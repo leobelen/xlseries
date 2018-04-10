@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 xlseries
 
@@ -15,18 +14,17 @@ import os
 import platform
 from unidecode import unidecode
 
-from strategies import strategies
-from utils.xl_methods import make_wb_copy
-from strategies.discover.parameters import Parameters
-from utils.xl_methods import open_xls_as_xlsx
-from utils.path_finders import get_package_dir
+from .strategies import strategies
+from .utils.xl_methods import make_wb_copy
+from .strategies.discover.parameters import Parameters
+from .utils.xl_methods import open_xls_as_xlsx
+from .utils.path_finders import get_package_dir
 
 import warnings
 warnings.filterwarnings("ignore")
 
 
 class XlSeries(object):
-
     """Time data series parser for excel files.
 
     Attributes:
@@ -64,8 +62,11 @@ class XlSeries(object):
             raise ValueError(xl_path + " is not an .xls or .xlsx file.")
 
     # PUBLIC
-    def get_data_frames(self, params_path_or_obj, ws_name=None,
-                        safe_mode=False, preserve_wb_obj=True):
+    def get_data_frames(self,
+                        params_path_or_obj,
+                        ws_name=None,
+                        safe_mode=False,
+                        preserve_wb_obj=True):
         """Scrape time series from an excel file into a pandas.DataFrame.
 
         Args:
@@ -111,12 +112,13 @@ class XlSeries(object):
             if len(ws_names) > 1:
                 msg = "There are {} worksheets: {}\nThe first {} will be " + \
                     "analyzed"
-                print msg.format(len(ws_names),
-                                 str([name.encode("utf-8")
-                                      for name in ws_names]),
-                                 ws_name.encode("utf-8"))
-                print "Remember you can choose a different one passing a " + \
-                    "ws_name keyword argument."
+                print(
+                    msg.format(
+                        len(ws_names),
+                        str([name.encode("utf-8") for name in ws_names]),
+                        ws_name.encode("utf-8")))
+                print("Remember you can choose a different one passing a " + \
+                    "ws_name keyword argument.")
         else:
             ws_name = self._sanitize_ws_name(ws_name, ws_names)
 
@@ -138,17 +140,18 @@ class XlSeries(object):
         if ws_name_orig in ws_names:
             return ws_name_orig
 
-        elif unicode(ws_name_orig) in ws_names:
-            return unicode(ws_name_orig)
+        elif str(ws_name_orig) in ws_names:
+            return str(ws_name_orig)
 
         # check other ws names that may match
         else:
             for ws_name in ws_names:
-                if unicode(ws_name_orig).strip() == unicode(ws_name).strip():
+                if str(ws_name_orig).strip() == str(ws_name).strip():
                     return ws_name
 
             for ws_name in ws_names:
-                if unidecode(ws_name_orig).strip() == unidecode(ws_name).strip():
+                if unidecode(ws_name_orig).strip() == unidecode(
+                        ws_name).strip():
                     return ws_name
 
         return ws_name_orig

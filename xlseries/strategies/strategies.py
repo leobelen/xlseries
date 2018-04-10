@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 strategies
 
@@ -24,14 +23,12 @@ from xlseries.utils.xl_methods import make_ws_copy
 
 # EXCEPTIONS
 class TimeIndexNotClean(Exception):
-
     """Raised if time index of a worksheet could not be cleaned."""
     pass
 
 
 # STRATEGIES
 class BaseXlSeriesScraper(object):
-
     """Base class for the highest level algorithms of `xlseries`.
 
     Attributes:
@@ -42,7 +39,10 @@ class BaseXlSeriesScraper(object):
             discover them or adopt a different approach to parse wb.
     """
 
-    def __init__(self, wb, params_path_or_obj=None, ws_name=None,
+    def __init__(self,
+                 wb,
+                 params_path_or_obj=None,
+                 ws_name=None,
                  headers_validation=False):
         self.wb = wb
         self.ws_name = ws_name
@@ -71,7 +71,6 @@ class BaseXlSeriesScraper(object):
 
 
 class ParameterDiscovery(BaseXlSeriesScraper):
-
     """Scraper that aims to discover and use key parsing parameters.
 
     The idea in ParameterDiscovery is that Every excel file with time series
@@ -122,8 +121,8 @@ class ParameterDiscovery(BaseXlSeriesScraper):
                     # don't return a list with only one element
                     if type(dfs) == list and len(dfs) == 1:
                         dfs = dfs[0]
-                    if (type(params_attempt) == list and
-                            len(params_attempt) == 1):
+                    if (type(params_attempt) == list
+                            and len(params_attempt) == 1):
                         params_attempt = params_attempt[0]
 
                     results.append((dfs, params_attempt))
@@ -167,7 +166,7 @@ Last attempt was:
                 return unique_results[0]
 
             else:
-                print "There is more than one result with given parameters."
+                print("There is more than one result with given parameters.")
                 dfs = [res[0] for res in unique_results]
                 params = [res[1] for res in unique_results]
                 return (dfs, params_attempt)
@@ -205,7 +204,7 @@ Last attempt was:
         else:
             time_indexes_ends = {}
             time_indexes = set()
-            for i_series in xrange(len(params.time_header_coord)):
+            for i_series in range(len(params.time_header_coord)):
 
                 # avoid cleaning the same time index twice
                 time_header_coord = params["time_header_coord"][i_series]
@@ -225,7 +224,7 @@ Last attempt was:
                         time_header_coord]
 
         # 2. Clean data values
-        for i_series in xrange(len(params.headers_coord)):
+        for i_series in range(len(params.headers_coord)):
             cls._clean_values(ws)
 
     @classmethod
@@ -237,11 +236,14 @@ Last attempt was:
         for period_range in cls._get_period_ranges(ws, params):
             hashable_pr = cls._hash_period_range(period_range)
             if hashable_pr not in dfs_dict:
-                dfs_dict[hashable_pr] = {"columns": [], "data": [],
-                                         "period_range": period_range}
+                dfs_dict[hashable_pr] = {
+                    "columns": [],
+                    "data": [],
+                    "period_range": period_range
+                }
 
         # 2. Get name (column) and values of each data series
-        for i_series in xrange(len(params.headers_coord)):
+        for i_series in range(len(params.headers_coord)):
 
             # iterate strategies looking for someone that accepts it
             params_series = params[i_series]
@@ -260,18 +262,16 @@ Last attempt was:
                 msg = "There is no strategy to deal with " + str(params_series)
                 raise Exception(msg)
 
-            if (params_series["time_multicolumn"] and
-                    type(params_series["time_header_coord"]) == list):
+            if (params_series["time_multicolumn"]
+                    and type(params_series["time_header_coord"]) == list):
                 time_header_coord = params_series["time_header_coord"][0]
             else:
                 time_header_coord = params_series["time_header_coord"]
 
-            prs = cls._get_series_prs(ws, params_series["frequency"],
-                                      params_series["data_starts"],
-                                      time_header_coord,
-                                      params_series["data_ends"],
-                                      params_series["time_alignment"],
-                                      params_series["alignment"])
+            prs = cls._get_series_prs(
+                ws, params_series["frequency"], params_series["data_starts"],
+                time_header_coord, params_series["data_ends"],
+                params_series["time_alignment"], params_series["alignment"])
 
             for period_range, (name, values) in zip(prs, names_and_values):
                 hashable_pr = cls._hash_period_range(period_range)
@@ -281,7 +281,7 @@ Last attempt was:
 
         # 3. Build data frames
         dfs = []
-        for df_inputs in dfs_dict.values():
+        for df_inputs in list(dfs_dict.values()):
 
             period_range = df_inputs["period_range"]
             columns = df_inputs["columns"]
@@ -290,27 +290,23 @@ Last attempt was:
             # try with business days if daily frequency fails
             if period_range.freqstr == "D":
                 try:
-                    df = pd.DataFrame(index=period_range,
-                                      columns=columns,
-                                      data=data)
+                    df = pd.DataFrame(
+                        index=period_range, columns=columns, data=data)
                 except ValueError:
                     # rework period range in business days
                     pr = period_range
-                    ini_date = "{}-{}-{}".format(pr[0].year,
-                                                 pr[0].month, pr[0].day)
-                    end_date = "{}-{}-{}".format(pr[-1].year,
-                                                 pr[-1].month, pr[-1].day)
+                    ini_date = "{}-{}-{}".format(pr[0].year, pr[0].month,
+                                                 pr[0].day)
+                    end_date = "{}-{}-{}".format(pr[-1].year, pr[-1].month,
+                                                 pr[-1].day)
                     pr_B = pd.period_range(ini_date, end_date, freq="B")
 
-                    df = pd.DataFrame(index=pr_B,
-                                      columns=columns,
-                                      data=data)
+                    df = pd.DataFrame(index=pr_B, columns=columns, data=data)
 
             # go straight if frequency is not daily
             else:
-                df = pd.DataFrame(index=period_range,
-                                  columns=columns,
-                                  data=data)
+                df = pd.DataFrame(
+                    index=period_range, columns=columns, data=data)
 
             dfs.append(df)
 
@@ -338,15 +334,17 @@ Last attempt was:
         if not non_discovered:
             return [params]
 
-        missings_dict = {missing_param: params.VALID_VALUES[missing_param]
-                         for missing_param in non_discovered}
+        missings_dict = {
+            missing_param: params.VALID_VALUES[missing_param]
+            for missing_param in non_discovered
+        }
 
         attempts = []
         for combination in cls._param_combinations_generator(
                 missings_dict, params.DEFAULT_VALUES, params.LIKELINESS_ORDER):
             new_params = copy.deepcopy(params)
 
-            for param_name, param_value in combination.iteritems():
+            for param_name, param_value in combination.items():
                 new_params[param_name] = param_value
 
             msg = repr(new_params) + \
@@ -359,7 +357,9 @@ Last attempt was:
         return attempts
 
     @classmethod
-    def _param_combinations_generator(cls, missings_dict, default_values=None,
+    def _param_combinations_generator(cls,
+                                      missings_dict,
+                                      default_values=None,
                                       likeliness_order=None):
         """Generator of valid values combinations of missing parameters.
 
@@ -423,9 +423,8 @@ Last attempt was:
                             " is required."
                         raise Exception(msg)
 
-            for comb in cls._param_combinations_generator(missings_dict_c,
-                                                          default_values,
-                                                          likeliness_order_c):
+            for comb in cls._param_combinations_generator(
+                    missings_dict_c, default_values, likeliness_order_c):
 
                 # yield default value first
                 valid_values_c = copy.deepcopy(valid_values)
@@ -489,8 +488,7 @@ Last attempt was:
                 params.time_alignment, params.alignment):
 
             msg = "No end could be estimated! End: {} | Start: {}".format(
-                repr(end_row).ljust(6), ini_row
-            )
+                repr(end_row).ljust(6), ini_row)
             assert end_row and end_row > ini_row, msg
 
             # if time is multicolumn, pass only the first column
@@ -500,9 +498,8 @@ Last attempt was:
                 time_header_coord_single = time_header_coord
 
             for pr in cls._get_series_prs(ws, freq, ini_row,
-                                          time_header_coord_single,
-                                          end_row, time_alignement,
-                                          alignment):
+                                          time_header_coord_single, end_row,
+                                          time_alignement, alignment):
                 yield pr
 
     @classmethod
@@ -532,12 +529,12 @@ Last attempt was:
             if strategy.accepts(ws, freq):
                 return strategy.get_period_ranges(ws, freq, ini_row,
                                                   time_header_coord, end_row,
-                                                  time_alignement,
-                                                  alignment)
+                                                  time_alignement, alignment)
 
-        msg = " ".join(["There is no strategy to get period range for",
-                        "\nFrequency:", freq,
-                        "\nTime header coord:", time_header_coord])
+        msg = " ".join([
+            "There is no strategy to get period range for", "\nFrequency:",
+            freq, "\nTime header coord:", time_header_coord
+        ])
         raise Exception(msg)
 
     @classmethod
@@ -563,7 +560,7 @@ Last attempt was:
         if index <= 1:
             return name
         else:
-            return name + "." + unicode(index)
+            return name + "." + str(index)
 
 
 def get_strategies():

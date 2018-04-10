@@ -8,7 +8,6 @@ from copy import deepcopy
 
 from xlseries.utils.xl_methods import xl_coordinates_range, consecutive_cells
 from xlseries.utils.xl_methods import common_row_or_column, coord_in_scope
-
 """
 parameters
 
@@ -19,53 +18,52 @@ and all the secondary ones used for it.
 
 # EXCEPTIONS
 class InvalidParameter(ValueError):
-
     """Raised when a parameter is of a non valid value."""
 
     def __init__(self, param_name, value, valid_values):
-        msg = u"""{value} {value_type} is not a valid value for {param_name}
+        msg = """{value} {value_type} is not a valid value for {param_name}
                    parameter. The valid values are {valid_values}.
-        """.format(param_name=param_name, value=value,
-                   valid_values=valid_values, value_type=type(value))
+        """.format(
+            param_name=param_name,
+            value=value,
+            valid_values=valid_values,
+            value_type=type(value))
         super(InvalidParameter, self).__init__(msg)
 
 
 class CriticalParameterMissing(Exception):
-
     """Raised when a critical parameter is not provided by the user."""
 
     def __init__(self, param_name):
-        msg = u"{param_name} is a critical parameter. It has to be " + \
+        msg = "{param_name} is a critical parameter. It has to be " + \
             "provided by the user."
         super(CriticalParameterMissing, self).__init__(
             msg.format(param_name=param_name))
 
 
 class InputParametersNotRecognized(Exception):
-
     """Raised when parameters obj passed by the user are not recognized."""
 
     def __init__(self, params):
-        msg = u"User input\n{params}\n{params_type} not recognized." + \
+        msg = "User input\n{params}\n{params_type} not recognized." + \
             "".format(params=params, params_type=type(params))
         super(InputParametersNotRecognized, self).__init__(msg)
 
 
 # CLASS
 class Parameters(object):
-
     """Object that collects input parameters from parsing strategies."""
 
     # this is a complete list of the parameters (of all kinds)
     VALID_VALUES = {
         # general
-        "alignment": [u"vertical", u"horizontal"],
+        "alignment": ["vertical", "horizontal"],
 
         # headers
-        "series_names": [str, unicode, None],
-        "headers_coord": [str, unicode],
-        "composed_headers_coord": [list, str, unicode, None],
-        "context": [dict, list, str, unicode, None],
+        "series_names": [str, str, None],
+        "headers_coord": [str, str],
+        "composed_headers_coord": [list, str, str, None],
+        "context": [dict, list, str, str, None],
 
         # data
         "data_starts": [int],
@@ -78,7 +76,7 @@ class Parameters(object):
         # time
         "time_alignment": [-1, 0, 1],
         "time_multicolumn": [True, False],
-        "time_header_coord": [str, unicode, list],
+        "time_header_coord": [str, str, list],
         "time_composed": [True, False],
         "frequency": ["A", "S", "Q", "M", "W", "D"]
     }
@@ -94,34 +92,47 @@ class Parameters(object):
     # critical values must be provided, they don't have defaults
     # all non critical MUST have default values in this variable
     DEFAULT_VALUES = {
-        "time_alignment": 0,
-        "alignment": u"vertical",
-        "continuity": True,
-        "blank_rows": False,
-        "missings": False,
-        "time_composed": False,
-        "time_multicolumn": False,
+        "time_alignment":
+        0,
+        "alignment":
+        "vertical",
+        "continuity":
+        True,
+        "blank_rows":
+        False,
+        "missings":
+        False,
+        "time_composed":
+        False,
+        "time_multicolumn":
+        False,
         "missing_value": [
             None, "-", "...", ".", "/", "///", "", "s.d.", "s/d", "n,d,",
             "s.d", " "
         ],
-        "data_ends": None,
-        "series_names": None,
-        "composed_headers_coord": None,
-        "context": None
+        "data_ends":
+        None,
+        "series_names":
+        None,
+        "composed_headers_coord":
+        None,
+        "context":
+        None
     }
 
     # order in which default values are most common in xl time series
-    LIKELINESS_ORDER = ["time_alignment", "alignment", "continuity",
-                        "blank_rows", "missings", "time_composed",
-                        "time_multicolumn"]
+    LIKELINESS_ORDER = [
+        "time_alignment", "alignment", "continuity", "blank_rows", "missings",
+        "time_composed", "time_multicolumn"
+    ]
 
     # parameters that will be guessed in this class, if missing
     GUESSED = ["time_multicolumn"]
 
     # parameters that don't need to be specified
-    OPTIONAL = ["series_names", "data_ends", "composed_headers_coord",
-                "context"]
+    OPTIONAL = [
+        "series_names", "data_ends", "composed_headers_coord", "context"
+    ]
 
     # parameters whose default value will be used, if missing
     USE_DEFAULT = ["time_alignment", "missing_value"]
@@ -129,11 +140,7 @@ class Parameters(object):
     # auxiliar way to reckon a Parameters object passed to constructor
     TYPE_PARAMETERS = "<class 'xlseries.strategies.discover.parameters.Parameters'>"
 
-    FREQ_TRANSLATION = {
-        "Y": "A",
-        "YQQQQ": "AQQQQ",
-        "QQQQY": "QQQQA"
-    }
+    FREQ_TRANSLATION = {"Y": "A", "YQQQQ": "AQQQQ", "QQQQY": "QQQQA"}
 
     def __init__(self, params_input=None):
 
@@ -162,8 +169,8 @@ class Parameters(object):
         self.frequency = None
 
         if params_input:
-            built_params = self._build(self._get_params_dict(
-                deepcopy(params_input)))
+            built_params = self._build(
+                self._get_params_dict(deepcopy(params_input)))
 
             for param_name in self.VALID_VALUES:
                 if param_name in built_params:
@@ -178,12 +185,12 @@ class Parameters(object):
         if type(params_input) == dict:
             return deepcopy(params_input)
 
-        elif (type(params_input) == Parameters or
-              unicode(type(params_input)) == cls.TYPE_PARAMETERS):
+        elif (type(params_input) == Parameters
+              or str(type(params_input)) == cls.TYPE_PARAMETERS):
             return params_input.__dict__
 
-        elif ((type(params_input) == str or type(params_input) == unicode) and
-              params_input[-5:] == ".json"):
+        elif ((type(params_input) == str or type(params_input) == str)
+              and params_input[-5:] == ".json"):
             with open(params_input) as f:
                 return json.load(f)
 
@@ -207,20 +214,18 @@ class Parameters(object):
         # curate frequency capitalization and translate
         if type(params_dict["frequency"]) == list:
             params_dict["frequency"] = [
-                cls.FREQ_TRANSLATION.get(i.upper(), i.upper()) for i in
-                params_dict["frequency"]
+                cls.FREQ_TRANSLATION.get(i.upper(), i.upper())
+                for i in params_dict["frequency"]
             ]
         else:
             params_dict["frequency"] = cls.FREQ_TRANSLATION.get(
                 params_dict["frequency"].upper(),
-                params_dict["frequency"].upper()
-            )
+                params_dict["frequency"].upper())
 
         cls._validate_parameters(params_dict, cls.VALID_VALUES)
 
-        params_def = cls._missings_to_default(params_dict, cls.USE_DEFAULT,
-                                              cls.VALID_VALUES,
-                                              cls.DEFAULT_VALUES)
+        params_def = cls._missings_to_default(
+            params_dict, cls.USE_DEFAULT, cls.VALID_VALUES, cls.DEFAULT_VALUES)
 
         composed_hc, headers_coord = cls._process_headers_coord(
             params_def["headers_coord"])
@@ -242,8 +247,8 @@ class Parameters(object):
 
         # guess parameters based on other parameters
         num_series = cls._get_num_series(params_def)
-        if ("time_multicolumn" not in params_def or
-                not params_def["time_multicolumn"]):
+        if ("time_multicolumn" not in params_def
+                or not params_def["time_multicolumn"]):
             params_def["time_multicolumn"] = cls._guess_time_multicolumn(
                 params_def["time_header_coord"], num_series)
 
@@ -252,7 +257,7 @@ class Parameters(object):
                 params_def["headers_coord"])
 
         # apply single provided parameters to all series
-        for param_name in params_def.keys():
+        for param_name in list(params_def.keys()):
             params_def[param_name] = cls._apply_to_all(
                 param_name, params_def[param_name], num_series, params_def,
                 cls.VALID_VALUES[param_name])
@@ -303,9 +308,8 @@ class Parameters(object):
                                        self.VALID_VALUES[param_name])
 
             self.__dict__[param_name] = self._apply_to_all(
-                param_name, param_value, self._get_num_series(
-                    self.__dict__), self,
-                self.VALID_VALUES[param_name])
+                param_name, param_value, self._get_num_series(self.__dict__),
+                self, self.VALID_VALUES[param_name])
 
     def __iter__(self):
         for param in self.__dict__:
@@ -331,7 +335,7 @@ class Parameters(object):
 
         series_params = Parameters().__dict__
 
-        for param_name in series_params.keys():
+        for param_name in list(series_params.keys()):
             if self[param_name] is not None:
                 series_params[param_name] = self[param_name][i_series]
 
@@ -348,15 +352,15 @@ class Parameters(object):
 
         for param_name in self:
             if param_name == "time_header_coord":
-                if (param_name not in self.OPTIONAL and
-                    (self[param_name] is None or
-                     len(self[param_name]) < min(2, num_series))):
+                if (param_name not in self.OPTIONAL
+                        and (self[param_name] is None
+                             or len(self[param_name]) < min(2, num_series))):
                     return False
 
             else:
-                if (param_name not in self.OPTIONAL and
-                    (self[param_name] is None or
-                     len(self[param_name]) != num_series)):
+                if (param_name not in self.OPTIONAL
+                        and (self[param_name] is None
+                             or len(self[param_name]) != num_series)):
                     return False
 
         return True
@@ -377,8 +381,10 @@ class Parameters(object):
                 that have differences across series.
         """
         if not differents:
-            return [param for param in self if (self._non_critical(param) and
-                                                self._no_differences(param))]
+            return [
+                param for param in self
+                if (self._non_critical(param) and self._no_differences(param))
+            ]
         else:
             return [param for param in self if self._non_critical(param)]
 
@@ -388,8 +394,10 @@ class Parameters(object):
 
     def remove_non_critical(self, differents=False):
         """Remove all non critical parameters but the ones that use default."""
-        [self.remove(i) for i in self.get_non_critical_params(differents) if
-         i not in self.USE_DEFAULT and i not in self.GUESSED]
+        [
+            self.remove(i) for i in self.get_non_critical_params(differents)
+            if i not in self.USE_DEFAULT and i not in self.GUESSED
+        ]
 
         # restore optionals
         for optional_param in self.OPTIONAL:
@@ -403,13 +411,13 @@ class Parameters(object):
         """Remove series whose headers are None values in the worksheet."""
 
         removed = 0
-        for index, (header_coord, composed_hc) in enumerate(zip(
-                self.headers_coord, self.composed_headers_coord)):
+        for index, (header_coord, composed_hc) in enumerate(
+                zip(self.headers_coord, self.composed_headers_coord)):
 
             not_header = not ws[header_coord].value
-            not_composed_headers = (not composed_hc or
-                                    not any([ws[hc].value for
-                                             hc in composed_hc]))
+            not_composed_headers = (
+                not composed_hc
+                or not any([ws[hc].value for hc in composed_hc]))
 
             if not_header and not_composed_headers:
                 self.remove_series(index - removed)
@@ -420,21 +428,23 @@ class Parameters(object):
         num_series = len(self)
 
         for param_name in self:
-            if (type(self[param_name]) == list and
-                    len(self[param_name]) == num_series):
+            if (type(self[param_name]) == list
+                    and len(self[param_name]) == num_series):
                 del self[param_name][index]
 
     @classmethod
     def get_critical_params_template(cls):
         """Return a template dictionary of critical params."""
-        return {param: value for param, value in
-                cls.CRITICAL.iteritems() if
-                param in cls.CRITICAL}
+        return {
+            param: value
+            for param, value in cls.CRITICAL.items() if param in cls.CRITICAL
+        }
 
     @classmethod
     def get_complete_params_template(cls):
         """Return a template dictionary of critical params."""
-        return dict(cls.CRITICAL.items() + cls.DEFAULT_VALUES.items())
+        return dict(
+            list(cls.CRITICAL.items()) + list(cls.DEFAULT_VALUES.items()))
 
     def compact_repr(self):
         """Return a dict of the parameters in their compact representation.
@@ -444,9 +454,9 @@ class Parameters(object):
 
         params_compact = {}
         for param_name in self:
-            if (not self._is_missing(param_name) and
-                    not self._is_optional(param_name) and
-                    not self._is_default(param_name)):
+            if (not self._is_missing(param_name)
+                    and not self._is_optional(param_name)
+                    and not self._is_default(param_name)):
 
                 if self._is_repeated(self[param_name]):
                     params_compact[param_name] = self[param_name][0]
@@ -464,8 +474,8 @@ class Parameters(object):
             if critical_param not in params_dict:
                 raise CriticalParameterMissing(critical_param)
 
-            elif (params_dict[critical_param] is None and
-                    None not in valid_values[critical_param]):
+            elif (params_dict[critical_param] is None
+                  and None not in valid_values[critical_param]):
                 raise CriticalParameterMissing(critical_param)
 
     # PRIVATE for build step 2: validate passed parameter values
@@ -473,7 +483,7 @@ class Parameters(object):
     def _validate_parameters(cls, params_dict, valid_values):
         """Check that all values of the parameters are valid."""
 
-        for param_name, param_value in params_dict.iteritems():
+        for param_name, param_value in params_dict.items():
 
             # if a parameter is not provided, its validity cannot be checked
             if param_value is None:
@@ -496,13 +506,12 @@ class Parameters(object):
                         raise InvalidParameter(param_name, value,
                                                valid_values[param_name])
                     else:
-                        for context_value in param_value.values():
+                        for context_value in list(param_value.values()):
                             if not cls._valid_param_value(
                                     context_value, valid_values[param_name]):
-                                raise InvalidParameter(param_name,
-                                                       context_value,
-                                                       valid_values[
-                                                           param_name])
+                                raise InvalidParameter(
+                                    param_name, context_value,
+                                    valid_values[param_name])
 
                 else:
                     if not cls._valid_param_value(value,
@@ -549,9 +558,9 @@ class Parameters(object):
         params_def = params_dict.copy()
 
         for param_default in use_default:
-            if ((param_default not in params_dict or
-                 params_dict[param_default] is None) and
-                    None not in valid_values[param_default]):
+            if ((param_default not in params_dict
+                 or params_dict[param_default] is None)
+                    and None not in valid_values[param_default]):
                 params_def[param_default] = default_values[param_default]
 
         return params_def
@@ -561,7 +570,7 @@ class Parameters(object):
     def _unpack_header_ranges(cls, coord_param):
 
         if (not coord_param or len(coord_param) == 0 or
-                (type(coord_param) != list and coord_param.lower() == "none")):
+            (type(coord_param) != list and coord_param.lower() == "none")):
             return None
 
         return list(cls._unpack_header_ranges_generator(coord_param))
@@ -569,7 +578,7 @@ class Parameters(object):
     @classmethod
     def _unpack_header_ranges_generator(cls, coord_param):
 
-        if type(coord_param) == str or type(coord_param) == unicode:
+        if type(coord_param) == str or type(coord_param) == str:
             if "-" not in coord_param and ":" not in coord_param:
                 yield coord_param.upper()
             else:
@@ -587,10 +596,10 @@ class Parameters(object):
                     end = end.replace("(", "").replace(")", "")
 
                     ranges = []
-                    for composed_start, composed_end in zip(start.split("_"),
-                                                            end.split("_")):
-                        ranges.append(xl_coordinates_range(composed_start,
-                                                           composed_end))
+                    for composed_start, composed_end in zip(
+                            start.split("_"), end.split("_")):
+                        ranges.append(
+                            xl_coordinates_range(composed_start, composed_end))
                     for cell in zip(*ranges):
                         yield "_".join(cell)
 
@@ -649,11 +658,12 @@ class Parameters(object):
         """
 
         # unpack context ranges first
-        for context_name, context_coords in context.iteritems():
+        for context_name, context_coords in context.items():
             context[context_name] = cls._unpack_header_ranges(context_coords)
 
-        ordered_context = sorted(context.iteritems(),
-                                 key=lambda tup: common_row_or_column(tup[1]))
+        ordered_context = sorted(
+            iter(context.items()),
+            key=lambda tup: common_row_or_column(tup[1]))
 
         new_context = [[] for hc in headers_coord]
         for hc_context, header_coord in zip(new_context, headers_coord):
@@ -676,8 +686,7 @@ class Parameters(object):
         """
 
         # convert ranges of headers (eg. "B8-B28") in lists
-        headers_coord = cls._unpack_header_ranges(
-            headers_coord)
+        headers_coord = cls._unpack_header_ranges(headers_coord)
 
         # extract composed headers from headers_coord
         composed_hc, headers_coord = cls._separate_composed_headers(
@@ -698,8 +707,10 @@ class Parameters(object):
 
         if type(params_def["headers_coord"]) == list:
             rows = [ws[coord].row for coord in params_def["headers_coord"]]
-            cols = [column_index_from_string(ws[coord].column)
-                    for coord in params_def["headers_coord"]]
+            cols = [
+                column_index_from_string(ws[coord].column)
+                for coord in params_def["headers_coord"]
+            ]
 
             probably_vertical, probably_horizontal = None, None
             if "alignment" in params_def:
@@ -708,10 +719,10 @@ class Parameters(object):
                 alignment = None
 
                 if len(params_def["headers_coord"]) > 1:
-                    probably_vertical = (len(set(rows)) == 1 and
-                                         len(set(cols)) == len(cols))
-                    probably_horizontal = (len(set(cols)) == 1 and
-                                           len(set(rows)) == len(rows))
+                    probably_vertical = (len(set(rows)) == 1
+                                         and len(set(cols)) == len(cols))
+                    probably_horizontal = (len(set(cols)) == 1
+                                           and len(set(rows)) == len(rows))
 
             if alignment == "vertical" or probably_vertical:
                 msg = "Row {} where data starts, must be after {} where " + \
@@ -741,12 +752,10 @@ class Parameters(object):
         else:
             tch = time_header_coord
 
-        if (type(tch) == list and
-                len(tch) != num_series):
+        if (type(tch) == list and len(tch) != num_series):
             return True
-        elif (type(tch) == list and
-                len(tch) == num_series and
-                consecutive_cells(tch)):
+        elif (type(tch) == list and len(tch) == num_series
+              and consecutive_cells(tch)):
             return True
         else:
             return False
@@ -764,11 +773,13 @@ class Parameters(object):
         if type(headers_coord) != list or len(headers_coord) <= 1:
             return None
 
-        if ((len(headers_coord) < 4 and consecutive_cells(headers_coord)) or
-                len(headers_coord) >= 4):
+        if ((len(headers_coord) < 4 and consecutive_cells(headers_coord))
+                or len(headers_coord) >= 4):
             rows = [ws[coord].row for coord in headers_coord]
-            cols = [column_index_from_string(ws[coord].column)
-                    for coord in headers_coord]
+            cols = [
+                column_index_from_string(ws[coord].column)
+                for coord in headers_coord
+            ]
 
             if len(set(rows)) == 1 and len(set(cols)) == len(cols):
                 return "vertical"
@@ -780,7 +791,11 @@ class Parameters(object):
 
     # PRIVATE for build step 7: apply parameters to all series
     @classmethod
-    def _apply_to_all(cls, param_name, param_value, num_series, params,
+    def _apply_to_all(cls,
+                      param_name,
+                      param_value,
+                      num_series,
+                      params,
                       valid_values=None):
         """Creates list from single parameter repeating it for every series."""
 
@@ -794,11 +809,11 @@ class Parameters(object):
             return None
 
         elif not type(param_value) == list and num_series:
-            param_list = [param_value for i in xrange(num_series)]
+            param_list = [param_value for i in range(num_series)]
 
-        elif (type(param_value) == list and len(param_value) == 1 and
-                num_series):
-            param_list = [param_value[0] for i in xrange(num_series)]
+        elif (type(param_value) == list and len(param_value) == 1
+              and num_series):
+            param_list = [param_value[0] for i in range(num_series)]
 
         else:
             param_list = param_value
@@ -806,17 +821,20 @@ class Parameters(object):
         return param_list
 
     @classmethod
-    def _apply_to_all_time_header(cls, time_header_coord, num_series, params,
+    def _apply_to_all_time_header(cls,
+                                  time_header_coord,
+                                  num_series,
+                                  params,
                                   valid_values=None):
         """Creates list from single parameter repeating it for every series."""
 
-        if (type(time_header_coord) == list and
-                type(time_header_coord[0]) == list):
+        if (type(time_header_coord) == list
+                and type(time_header_coord[0]) == list):
             if len(time_header_coord) == num_series:
                 return time_header_coord
             else:
                 raise ValueError("time_header_coord list of lists has to be" +
-                                 " of " + unicode(num_series) + " length.")
+                                 " of " + str(num_series) + " length.")
 
         elif type(params["time_multicolumn"]) == list:
             time_multicolumn = params["time_multicolumn"][0]
@@ -825,25 +843,25 @@ class Parameters(object):
             time_multicolumn = params["time_multicolumn"]
 
         if (not type(time_header_coord) == list or not time_multicolumn):
-            return cls._apply_to_all("", time_header_coord, num_series,
-                                     params, valid_values)
+            return cls._apply_to_all("", time_header_coord, num_series, params,
+                                     valid_values)
         else:
-            return [time_header_coord for i in xrange(num_series)]
+            return [time_header_coord for i in range(num_series)]
 
     @classmethod
     def _apply_to_all_missing_value(cls, missing_value, num_series):
         """Creates list from single parameter repeating it for every series."""
 
         if not type(missing_value) == list:
-            return [[missing_value] for i in xrange(num_series)]
+            return [[missing_value] for i in range(num_series)]
 
-        elif (type(missing_value) == list and
-              (len(missing_value) == 0 or type(missing_value[0]) != list)):
-            return [missing_value for i in xrange(num_series)]
+        elif (type(missing_value) == list
+              and (len(missing_value) == 0 or type(missing_value[0]) != list)):
+            return [missing_value for i in range(num_series)]
 
         else:
             msg = "If missing values are specified for every single " + \
-                "series, you must specify them for the " + unicode(num_series)
+                "series, you must specify them for the " + str(num_series)
             assert len(missing_value) == num_series, msg
             return missing_value
 
@@ -853,7 +871,7 @@ class Parameters(object):
         """Count number of series present in parameters."""
 
         num_series = None
-        for param_name, param_value in params.iteritems():
+        for param_name, param_value in params.items():
             if type(param_value) == list and param_name != "missing_value":
                 if not num_series or len(param_value) > num_series:
                     num_series = len(param_value)
@@ -870,11 +888,11 @@ class Parameters(object):
     def _is_default(self, param_name):
         """True if parameter is a USE_DEFAULT and is set to its def value."""
         if self._is_repeated(self[param_name]):
-            return (param_name in self.USE_DEFAULT and
-                    self.DEFAULT_VALUES[param_name] == self[param_name][0])
+            return (param_name in self.USE_DEFAULT
+                    and self.DEFAULT_VALUES[param_name] == self[param_name][0])
         elif not type(param_name) == list:
-            return (param_name in self.USE_DEFAULT and
-                    self.DEFAULT_VALUES[param_name] == self[param_name])
+            return (param_name in self.USE_DEFAULT
+                    and self.DEFAULT_VALUES[param_name] == self[param_name])
         else:
             return False
 
@@ -888,12 +906,11 @@ class Parameters(object):
     def _valid_param_list(self, param_name, param_value, num_series):
         """Return True if param_value is a valid list of parameters for
         param_name."""
-        return (type(param_value) == list and
-                len(param_value) == num_series and
-                all(self._valid_param_value(param,
-                                            self.VALID_VALUES[param_name])
-                    for param in param_value)
-                )
+        return (
+            type(param_value) == list and len(param_value) == num_series
+            and all(
+                self._valid_param_value(param, self.VALID_VALUES[param_name])
+                for param in param_value))
 
     def _non_critical(self, param):
         """Return True if param is not critical."""

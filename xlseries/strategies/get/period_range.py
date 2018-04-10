@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 period_range
 
@@ -11,7 +10,6 @@ Be aware that every class in this namespace whose name doesn't start with
 looking for accepting or refusing certain input.
 """
 
-from __future__ import unicode_literals
 from pprint import pprint
 from openpyxl.utils import column_index_from_string
 import pandas as pd
@@ -21,7 +19,6 @@ from xlseries.utils.xl_methods import normalize_value, normalize_time_value
 
 
 class BaseGetPeriodRangesStrategy(object):
-
     """Base class for all strategies to get period ranges."""
 
     # PUBLIC INTERFACE
@@ -37,18 +34,11 @@ class BaseGetPeriodRangesStrategy(object):
 
     @staticmethod
     def _convert_freq(freq):
-        translator = {
-            "A": "AS",
-            "Y": "AS",
-            "S": "6MS",
-            "Q": "QS",
-            "M": "MS"
-        }
+        translator = {"A": "AS", "Y": "AS", "S": "6MS", "Q": "QS", "M": "MS"}
         return translator.get(freq, freq)
 
 
 class GetPeriodRangesSingleFrequency(BaseGetPeriodRangesStrategy):
-
     """Get period ranges for time series of a single frequency."""
 
     @classmethod
@@ -61,8 +51,8 @@ class GetPeriodRangesSingleFrequency(BaseGetPeriodRangesStrategy):
 
         if alignment == "vertical":
             col = column_index_from_string(ws[time_header_coord].column)
-            start = ws.cell(row=data_starts + time_alignement,
-                            column=col).value
+            start = ws.cell(
+                row=data_starts + time_alignement, column=col).value
             end = ws.cell(row=data_ends + time_alignement, column=col).value
 
         elif alignment == "horizontal":
@@ -75,15 +65,15 @@ class GetPeriodRangesSingleFrequency(BaseGetPeriodRangesStrategy):
             raise Exception("Series alignment must be 'vertical' or " +
                             "'horizontal', not " + repr(alignment))
 
-        return [pd.date_range(
-            normalize_time_value(start),
-            normalize_time_value(end),
-            freq=cls._convert_freq(freq)
-        )]
+        return [
+            pd.date_range(
+                normalize_time_value(start),
+                normalize_time_value(end),
+                freq=cls._convert_freq(freq))
+        ]
 
 
 class GetPeriodRangesMultifrequency(BaseGetPeriodRangesStrategy):
-
     """Get period ranges for multifrequency time series."""
 
     @classmethod
@@ -156,8 +146,7 @@ class GetPeriodRangesMultifrequency(BaseGetPeriodRangesStrategy):
             pd.date_range(
                 normalize_time_value(starts[f]),
                 normalize_time_value(ends[f]),
-                freq=cls._convert_freq(f))
-            for f in starts
+                freq=cls._convert_freq(f)) for f in starts
         ]
 
 

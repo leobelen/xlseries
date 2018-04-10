@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 data_frame
 
 Auxiliar methods to load and manipulate data frames.
 """
 
-from __future__ import unicode_literals
 import pandas as pd
 from openpyxl import load_workbook
 import os
@@ -15,13 +13,12 @@ import arrow
 import glob
 import string
 
-from time_manipulation import infer_freq
-from comparing import approx_equal
-from xl_methods import normalize_value
+from .time_manipulation import infer_freq
+from .comparing import approx_equal
+from .xl_methods import normalize_value
 
 
 class NoSerializedDataFrameFound(Exception):
-
     """Raises when no serialized data frame could be found."""
     pass
 
@@ -47,7 +44,7 @@ def get_data_frames(serial_df_path, use_period_range=True):
         wb = load_workbook(serial_df_path, read_only=True)
         ws_names = wb.sheetnames
 
-        for ws_index in xrange(len(ws_names)):
+        for ws_index in range(len(ws_names)):
             df = get_data_frame(serial_df_path, ws_index, use_period_range)
             dfs.append(df)
 
@@ -66,8 +63,8 @@ def get_data_frames(serial_df_path, use_period_range=True):
             dfs.append(get_data_frame(serial_df_path, use_period_range=True))
 
         elif os.path.isdir(serial_df_path.replace(".json", "")):
-            json_dir = os.path.join(serial_df_path.replace(".json", ""),
-                                    "*.json")
+            json_dir = os.path.join(
+                serial_df_path.replace(".json", ""), "*.json")
 
             for json_file in glob.glob(json_dir):
                 dfs.append(get_data_frame(json_file, use_period_range=True))
@@ -123,8 +120,8 @@ def get_data_frame(serial_df_path, index=0, use_period_range=True):
             file_name = base_name + letter + ".json"
             serial_df_path = os.path.join(serial_df_path, file_name)
 
-        elif (not os.path.isfile(serial_df_path) and
-              os.path.isdir(serial_df_path[:-5])):
+        elif (not os.path.isfile(serial_df_path)
+              and os.path.isdir(serial_df_path[:-5])):
 
             letter = string.lowercase[index]
             base_name = os.path.basename(serial_df_path)
@@ -134,13 +131,12 @@ def get_data_frame(serial_df_path, index=0, use_period_range=True):
         with open(serial_df_path) as f:
             df = pd.read_json(f).sort_index()
 
-    time_delta = ((arrow.get(df.index[-1]) - arrow.get(df.index[0])) /
-                  df.index.size)
+    time_delta = ((
+        arrow.get(df.index[-1]) - arrow.get(df.index[0])) / df.index.size)
     av_seconds = time_delta.total_seconds()
 
-    period_range = pd.date_range(df.index[0],
-                                 df.index[-1],
-                                 freq=infer_freq(av_seconds))
+    period_range = pd.date_range(
+        df.index[0], df.index[-1], freq=infer_freq(av_seconds))
 
     # select time representation
     if use_period_range:
@@ -149,9 +145,7 @@ def get_data_frame(serial_df_path, index=0, use_period_range=True):
         time_index = period_range.to_datetime()
 
     # rebuild data frame using a period range with frequency
-    df = pd.DataFrame(data=df.values,
-                      index=time_index,
-                      columns=df.columns)
+    df = pd.DataFrame(data=df.values, index=time_index, columns=df.columns)
 
     return df
 
@@ -253,19 +247,16 @@ def compare_data_frames(df1, df2):
                                                        df2.index.size)
 
     msg = "Different index freq"
-    assert df1.index.freqstr == df2.index.freqstr, _diff_msg(msg,
-                                                             df1.index.freqstr,
-                                                             df2.index.freqstr)
+    assert df1.index.freqstr == df2.index.freqstr, _diff_msg(
+        msg, df1.index.freqstr, df2.index.freqstr)
 
     msg = "Different columns"
-    assert _check_columns(df1.columns, df2.columns), _diff_msg(msg,
-                                                               df1.columns,
-                                                               df2.columns)
+    assert _check_columns(df1.columns, df2.columns), _diff_msg(
+        msg, df1.columns, df2.columns)
 
     msg = "Different index"
-    assert _check_index(df1.index, df2.index), _diff_msg(msg,
-                                                         df1.index,
-                                                         df2.index)
+    assert _check_index(df1.index, df2.index), _diff_msg(
+        msg, df1.index, df2.index)
 
     msg = "Too different values"
     assert _check_values(df1.columns, df1, df2), msg
@@ -275,7 +266,7 @@ def compare_data_frames(df1, df2):
 
 def _diff_msg(msg, elem1, elem2):
     """Creates a message for elements that differ in an assertion."""
-    return msg + ": " + unicode(elem1) + " != " + unicode(elem2)
+    return msg + ": " + str(elem1) + " != " + str(elem2)
 
 
 def _check_columns(cols1, cols2):
@@ -283,14 +274,14 @@ def _check_columns(cols1, cols2):
 
     for col1 in cols1:
         if col1 not in cols2:
-            msg = "".join(["'", col1, "'", "\nnot in cols2\n",
-                           "\n".join(list(cols2))])
+            msg = "".join(
+                ["'", col1, "'", "\nnot in cols2\n", "\n".join(list(cols2))])
             raise Exception(msg)
 
     for col2 in cols2:
         if col2 not in cols1:
-            msg = "".join(["'", col2, "'", "\nnot in cols1\n",
-                           "\n".join(list(cols1))])
+            msg = "".join(
+                ["'", col2, "'", "\nnot in cols1\n", "\n".join(list(cols1))])
             raise Exception(msg)
 
             return False
@@ -317,7 +308,7 @@ def _check_values(cols, df1, df2):
         for value1, value2 in zip(df1[col], df2[col]):
             # print value1, value2, value2/value1-1
             if not approx_equal(value1, value2, 0.0001):
-                print value1, "and", value2, "not approx_equal"
+                print(value1, "and", value2, "not approx_equal")
                 RV = False
                 break
 
@@ -339,11 +330,11 @@ def compare_period_ranges(pr1, pr2):
             pr2.freq), "Different frequency"
         assert normalize_value(pr1[0]) == normalize_value(
             pr2[0]), "Different initial date"
-        assert normalize_value(
-            pr1[-1]) == normalize_value(pr2[-1]), "Different final date"
+        assert normalize_value(pr1[-1]) == normalize_value(
+            pr2[-1]), "Different final date"
 
         return True
 
     except Exception as inst:
-        print inst
+        print(inst)
         return False

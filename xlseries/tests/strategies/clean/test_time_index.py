@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 test_clean_ti_strategies
 
@@ -28,7 +27,6 @@ from xlseries.utils.xl_methods import compare_cells
 from xlseries.utils.case_loaders import load_parameters_case
 from xlseries.utils.path_finders import abs_path
 
-
 bases = (BaseAccepts, BaseSingleTable, BaseSingleColumn, BaseSingleFrequency,
          BaseNoOffsetTi, BaseCleanTiStrategy)
 CleanSingleColumn = type("CleanSingleColumn", bases, {})
@@ -44,7 +42,6 @@ CleanMultiColumnsMultiFreq = type("CleanMultiColumnsMultiFreq", bases, {})
 
 # @unittest.skip("skip")
 class BaseCleanTiStrategyTestCase(unittest.TestCase):
-
     def test_correct_progression_backwards_exception(self):
         last = arrow.get(2015, 5, 9)
         curr = arrow.get(2015, 2, 15)
@@ -85,15 +82,13 @@ class CleanSingleColumnTestCase(unittest.TestCase):
         ini = 1
         end = 3
 
-        ti_iter = CleanSingleColumn._time_index_iterator(ws, alignment,
-                                                         time_header_coord,
-                                                         ini, end)
+        ti_iter = CleanSingleColumn._time_index_iterator(
+            ws, alignment, time_header_coord, ini, end)
         res = [i[0] for i in ti_iter]
         self.assertEqual(res, ["a", "b", "c"])
 
-        ti_iter = CleanSingleColumn._time_index_iterator(ws, alignment,
-                                                         time_header_coord,
-                                                         ini)
+        ti_iter = CleanSingleColumn._time_index_iterator(
+            ws, alignment, time_header_coord, ini)
         res = [i[0] for i in ti_iter]
         self.assertEqual(res, ["a", "b", "c", None])
 
@@ -105,15 +100,13 @@ class CleanSingleColumnTestCase(unittest.TestCase):
         time_header_coord = "F1"
         ini = 6
         end = 8
-        ti_iter = CleanSingleColumn._time_index_iterator(ws, alignment,
-                                                         time_header_coord,
-                                                         ini, end)
+        ti_iter = CleanSingleColumn._time_index_iterator(
+            ws, alignment, time_header_coord, ini, end)
         res = [i[0] for i in ti_iter]
         self.assertEqual(res, ["d", "e", "f"])
 
-        ti_iter = CleanSingleColumn._time_index_iterator(ws, alignment,
-                                                         time_header_coord,
-                                                         ini)
+        ti_iter = CleanSingleColumn._time_index_iterator(
+            ws, alignment, time_header_coord, ini)
         res = [i[0] for i in ti_iter]
         self.assertEqual(res, ["d", "e", "f", None])
 
@@ -127,10 +120,7 @@ class CleanSingleColumnTestCase(unittest.TestCase):
         missing_value = "Implicit"
 
         new_time_value = CleanSingleColumn()._correct_progression(
-            last_time_value,
-            curr_time_value,
-            freq, missings,
-            missing_value)
+            last_time_value, curr_time_value, freq, missings, missing_value)
         exp_time_value = arrow.get(2011, 7, 6)
 
         self.assertEqual(new_time_value, exp_time_value)
@@ -138,10 +128,7 @@ class CleanSingleColumnTestCase(unittest.TestCase):
         # progression wrong because going to the future
         curr_time_value = arrow.get(2011, 8, 6)
         new_time_value = CleanSingleColumn()._correct_progression(
-            last_time_value,
-            curr_time_value,
-            freq, missings,
-            missing_value)
+            last_time_value, curr_time_value, freq, missings, missing_value)
 
         self.assertEqual(new_time_value, exp_time_value)
 
@@ -154,8 +141,8 @@ class CleanSingleColumnTestCase(unittest.TestCase):
         params = load_parameters_case(2)
         # print repr(params[0])
 
-        new_time_value = CleanSingleColumn()._parse_time(params[0], value,
-                                                         last_time)
+        new_time_value = CleanSingleColumn()._parse_time(
+            params[0], value, last_time)
 
         exp_time_value = arrow.get(2009, 12, 17)
 
@@ -168,18 +155,20 @@ class CleanSingleColumnTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case3.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "vertical",
-                  "time_alignment": 0,
-                  "continuity": True,
-                  "blank_rows": False,
-                  "time_header_coord": "A4",
-                  "data_starts": 7,
-                  "data_ends": 119,
-                  "frequency": "Q",
-                  "missings": False,
-                  "missing_value": None,
-                  "time_multicolumn": False,
-                  "time_composed": True}
+        params = {
+            "alignment": "vertical",
+            "time_alignment": 0,
+            "continuity": True,
+            "blank_rows": False,
+            "time_header_coord": "A4",
+            "data_starts": 7,
+            "data_ends": 119,
+            "frequency": "Q",
+            "missings": False,
+            "missing_value": None,
+            "time_multicolumn": False,
+            "time_composed": True
+        }
 
         CleanSingleColumn().clean_time_index(ws, params)
 
@@ -196,18 +185,20 @@ class CleanSingleColumnTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case3.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "vertical",
-                  "time_alignment": 0,
-                  "continuity": True,
-                  "blank_rows": False,
-                  "time_header_coord": "A4",
-                  "data_starts": 7,
-                  "data_ends": None,
-                  "frequency": "Q",
-                  "missings": False,
-                  "missing_value": None,
-                  "time_multicolumn": False,
-                  "time_composed": True}
+        params = {
+            "alignment": "vertical",
+            "time_alignment": 0,
+            "continuity": True,
+            "blank_rows": False,
+            "time_header_coord": "A4",
+            "data_starts": 7,
+            "data_ends": None,
+            "frequency": "Q",
+            "missings": False,
+            "missing_value": None,
+            "time_multicolumn": False,
+            "time_composed": True
+        }
 
         end = CleanSingleColumn().clean_time_index(ws, params)
 
@@ -225,18 +216,20 @@ class CleanSingleColumnTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case1.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "vertical",
-                  "time_alignment": 0,
-                  "continuity": True,
-                  "blank_rows": False,
-                  "time_header_coord": "A1",
-                  "data_starts": 2,
-                  "data_ends": 256,
-                  "frequency": "M",
-                  "missings": True,
-                  "missing_value": None,
-                  "time_multicolumn": False,
-                  "time_composed": False}
+        params = {
+            "alignment": "vertical",
+            "time_alignment": 0,
+            "continuity": True,
+            "blank_rows": False,
+            "time_header_coord": "A1",
+            "data_starts": 2,
+            "data_ends": 256,
+            "frequency": "M",
+            "missings": True,
+            "missing_value": None,
+            "time_multicolumn": False,
+            "time_composed": False
+        }
 
         CleanSingleColumn().clean_time_index(ws, params)
 
@@ -253,18 +246,20 @@ class CleanSingleColumnTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case1.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "vertical",
-                  "time_alignment": 0,
-                  "continuity": True,
-                  "blank_rows": False,
-                  "time_header_coord": "A1",
-                  "data_starts": 2,
-                  "data_ends": None,
-                  "frequency": "M",
-                  "missings": True,
-                  "missing_value": None,
-                  "time_multicolumn": False,
-                  "time_composed": False}
+        params = {
+            "alignment": "vertical",
+            "time_alignment": 0,
+            "continuity": True,
+            "blank_rows": False,
+            "time_header_coord": "A1",
+            "data_starts": 2,
+            "data_ends": None,
+            "frequency": "M",
+            "missings": True,
+            "missing_value": None,
+            "time_multicolumn": False,
+            "time_composed": False
+        }
 
         end = CleanSingleColumn().clean_time_index(ws, params)
 
@@ -282,19 +277,21 @@ class CleanSingleColumnTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case2.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "vertical",
-                  "time_alignment": 0,
-                  "time_format": datetime.datetime,
-                  "continuity": True,
-                  "blank_rows": True,
-                  "time_header_coord": "C4",
-                  "data_starts": 5,
-                  "data_ends": 2993,
-                  "frequency": "D",
-                  "missings": True,
-                  "missing_value": "Implicit",
-                  "time_multicolumn": False,
-                  "time_composed": False}
+        params = {
+            "alignment": "vertical",
+            "time_alignment": 0,
+            "time_format": datetime.datetime,
+            "continuity": True,
+            "blank_rows": True,
+            "time_header_coord": "C4",
+            "data_starts": 5,
+            "data_ends": 2993,
+            "frequency": "D",
+            "missings": True,
+            "missing_value": "Implicit",
+            "time_multicolumn": False,
+            "time_composed": False
+        }
 
         CleanSingleColumn().clean_time_index(ws, params)
 
@@ -310,19 +307,21 @@ class CleanSingleColumnTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case2.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "vertical",
-                  "time_alignment": 0,
-                  "time_format": datetime.datetime,
-                  "continuity": True,
-                  "blank_rows": True,
-                  "time_header_coord": "C4",
-                  "data_starts": 5,
-                  "data_ends": None,
-                  "frequency": "D",
-                  "missings": True,
-                  "missing_value": "Implicit",
-                  "time_multicolumn": False,
-                  "time_composed": False}
+        params = {
+            "alignment": "vertical",
+            "time_alignment": 0,
+            "time_format": datetime.datetime,
+            "continuity": True,
+            "blank_rows": True,
+            "time_header_coord": "C4",
+            "data_starts": 5,
+            "data_ends": None,
+            "frequency": "D",
+            "missings": True,
+            "missing_value": "Implicit",
+            "time_multicolumn": False,
+            "time_composed": False
+        }
 
         end = CleanSingleColumn().clean_time_index(ws, params)
 
@@ -340,19 +339,21 @@ class CleanSingleColumnTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case5.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "vertical",
-                  "time_alignment": 0,
-                  "time_format": str,
-                  "continuity": False,
-                  "blank_rows": True,
-                  "time_header_coord": "A18",
-                  "data_starts": 28,
-                  "data_ends": 993,
-                  "frequency": "M",
-                  "missings": True,
-                  "missing_value": None,
-                  "time_multicolumn": False,
-                  "time_composed": True}
+        params = {
+            "alignment": "vertical",
+            "time_alignment": 0,
+            "time_format": str,
+            "continuity": False,
+            "blank_rows": True,
+            "time_header_coord": "A18",
+            "data_starts": 28,
+            "data_ends": 993,
+            "frequency": "M",
+            "missings": True,
+            "missing_value": None,
+            "time_multicolumn": False,
+            "time_composed": True
+        }
 
         CleanSingleColumn().clean_time_index(ws, params)
 
@@ -369,19 +370,21 @@ class CleanSingleColumnTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case5.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "vertical",
-                  "time_alignment": 0,
-                  "time_format": str,
-                  "continuity": False,
-                  "blank_rows": True,
-                  "time_header_coord": "A18",
-                  "data_starts": 28,
-                  "data_ends": None,
-                  "frequency": "M",
-                  "missings": True,
-                  "missing_value": None,
-                  "time_multicolumn": False,
-                  "time_composed": True}
+        params = {
+            "alignment": "vertical",
+            "time_alignment": 0,
+            "time_format": str,
+            "continuity": False,
+            "blank_rows": True,
+            "time_header_coord": "A18",
+            "data_starts": 28,
+            "data_ends": None,
+            "frequency": "M",
+            "missings": True,
+            "missing_value": None,
+            "time_multicolumn": False,
+            "time_composed": True
+        }
 
         end = CleanSingleColumn().clean_time_index(ws, params)
 
@@ -399,23 +402,25 @@ class CleanSingleColumnTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case7.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "horizontal",
-                  "blank_rows": True,
-                  "composed_headers": False,
-                  "data_starts": 2,
-                  "data_ends": 44,
-                  "frequency": "A",
-                  "continuity": False,
-                  "missings": False,
-                  "missing_value": "None",
-                  "multifrequency": False,
-                  "series_names": "None",
-                  "time_composed": True,
-                  "time_alignment": 0,
-                  "time_multicolumn": False,
-                  "time_format": int,
-                  "time_header": False,
-                  "time_header_coord": "A6"}
+        params = {
+            "alignment": "horizontal",
+            "blank_rows": True,
+            "composed_headers": False,
+            "data_starts": 2,
+            "data_ends": 44,
+            "frequency": "A",
+            "continuity": False,
+            "missings": False,
+            "missing_value": "None",
+            "multifrequency": False,
+            "series_names": "None",
+            "time_composed": True,
+            "time_alignment": 0,
+            "time_multicolumn": False,
+            "time_format": int,
+            "time_header": False,
+            "time_header_coord": "A6"
+        }
 
         CleanSingleColumn().clean_time_index(ws, params)
 
@@ -432,23 +437,25 @@ class CleanSingleColumnTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case7.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "horizontal",
-                  "blank_rows": True,
-                  "composed_headers": False,
-                  "data_starts": 2,
-                  "data_ends": None,
-                  "frequency": "A",
-                  "continuity": False,
-                  "missings": False,
-                  "missing_value": "None",
-                  "multifrequency": False,
-                  "series_names": "None",
-                  "time_composed": True,
-                  "time_alignment": 0,
-                  "time_multicolumn": False,
-                  "time_format": int,
-                  "time_header": False,
-                  "time_header_coord": "A6"}
+        params = {
+            "alignment": "horizontal",
+            "blank_rows": True,
+            "composed_headers": False,
+            "data_starts": 2,
+            "data_ends": None,
+            "frequency": "A",
+            "continuity": False,
+            "missings": False,
+            "missing_value": "None",
+            "multifrequency": False,
+            "series_names": "None",
+            "time_composed": True,
+            "time_alignment": 0,
+            "time_multicolumn": False,
+            "time_format": int,
+            "time_header": False,
+            "time_header_coord": "A6"
+        }
 
         end = CleanSingleColumn().clean_time_index(ws, params)
 
@@ -466,8 +473,8 @@ class CleanSingleColumnTestCase(unittest.TestCase):
         exp_time = arrow.get(2015, 5, 2)
         max_forth_time = arrow.get(2015, 5, 22)
         curr_time = arrow.get(2015, 7, 2)
-        fixed_time = BaseCleanTiStrategy._forth_time_value_typo(curr_time,
-                                                                max_forth_time)
+        fixed_time = BaseCleanTiStrategy._forth_time_value_typo(
+            curr_time, max_forth_time)
         self.assertEqual(exp_time, fixed_time)
 
 
@@ -482,18 +489,20 @@ class CleanMultipleColumnsTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case5b.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "vertical",
-                  "time_alignment": 0,
-                  "time_format": str,
-                  "time_header_coord": ["A18", "B18"],
-                  "data_starts": 28,
-                  "data_ends": 993,
-                  "frequency": "M",
-                  "missings": True,
-                  "missing_value": None,
-                  "time_multicolumn": True,
-                  "continuity": False,
-                  "time_composed": True}
+        params = {
+            "alignment": "vertical",
+            "time_alignment": 0,
+            "time_format": str,
+            "time_header_coord": ["A18", "B18"],
+            "data_starts": 28,
+            "data_ends": 993,
+            "frequency": "M",
+            "missings": True,
+            "missing_value": None,
+            "time_multicolumn": True,
+            "continuity": False,
+            "time_composed": True
+        }
 
         CleanMultipleColumns()._clean_time_index(ws, params)
 
@@ -519,9 +528,8 @@ class CleanMultipleColumnsTestCase(unittest.TestCase):
         time_header_coord = ["A1", "B1"]
         ini = 1
         end = 3
-        ti_iter = CleanMultipleColumns._time_index_iterator(ws, alignment,
-                                                            time_header_coord,
-                                                            ini, end)
+        ti_iter = CleanMultipleColumns._time_index_iterator(
+            ws, alignment, time_header_coord, ini, end)
         res = [i[0] for i in ti_iter]
         self.assertEqual(res, ["a 1", "b 2", "c 3"])
 
@@ -536,9 +544,8 @@ class CleanMultipleColumnsTestCase(unittest.TestCase):
         time_header_coord = ["F1", "F2"]
         ini = 6
         end = 8
-        ti_iter = CleanMultipleColumns._time_index_iterator(ws, alignment,
-                                                            time_header_coord,
-                                                            ini, end)
+        ti_iter = CleanMultipleColumns._time_index_iterator(
+            ws, alignment, time_header_coord, ini, end)
         res = [i[0] for i in ti_iter]
         self.assertEqual(res, ["d 4", "e 5", "f 6"])
 
@@ -553,24 +560,26 @@ class CleanMultiColumnsMultiFreqTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case6.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "horizontal",
-                  "blank_rows": True,
-                  "composed_headers": True,
-                  "data_starts": 3,
-                  "data_ends": 61,
-                  "frequency": "AQQQQ",
-                  "headers_coord": "B8-B28",
-                  "continuity": False,
-                  "missings": False,
-                  "missing_value": None,
-                  "multifrequency": True,
-                  "series_names": None,
-                  "time_composed": True,
-                  "time_alignment": 0,
-                  "time_multicolumn": True,
-                  "time_format": str,
-                  "time_header": True,
-                  "time_header_coord": ["C4", "C6"]}
+        params = {
+            "alignment": "horizontal",
+            "blank_rows": True,
+            "composed_headers": True,
+            "data_starts": 3,
+            "data_ends": 61,
+            "frequency": "AQQQQ",
+            "headers_coord": "B8-B28",
+            "continuity": False,
+            "missings": False,
+            "missing_value": None,
+            "multifrequency": True,
+            "series_names": None,
+            "time_composed": True,
+            "time_alignment": 0,
+            "time_multicolumn": True,
+            "time_format": str,
+            "time_header": True,
+            "time_header_coord": ["C4", "C6"]
+        }
 
         CleanMultiColumnsMultiFreq().clean_time_index(ws, params)
 
@@ -587,24 +596,26 @@ class CleanMultiColumnsMultiFreqTestCase(unittest.TestCase):
             os.path.join(abs_path("original"), "test_case6.xlsx"))
         ws = wb.active
 
-        params = {"alignment": "horizontal",
-                  "blank_rows": True,
-                  "composed_headers": True,
-                  "data_starts": 3,
-                  "data_ends": None,
-                  "frequency": "AQQQQ",
-                  "headers_coord": "B8-B28",
-                  "continuity": False,
-                  "missings": False,
-                  "missing_value": None,
-                  "multifrequency": True,
-                  "series_names": None,
-                  "time_composed": True,
-                  "time_alignment": 0,
-                  "time_multicolumn": True,
-                  "time_format": str,
-                  "time_header": True,
-                  "time_header_coord": ["C4", "C6"]}
+        params = {
+            "alignment": "horizontal",
+            "blank_rows": True,
+            "composed_headers": True,
+            "data_starts": 3,
+            "data_ends": None,
+            "frequency": "AQQQQ",
+            "headers_coord": "B8-B28",
+            "continuity": False,
+            "missings": False,
+            "missing_value": None,
+            "multifrequency": True,
+            "series_names": None,
+            "time_composed": True,
+            "time_alignment": 0,
+            "time_multicolumn": True,
+            "time_format": str,
+            "time_header": True,
+            "time_header_coord": ["C4", "C6"]
+        }
 
         end = CleanMultiColumnsMultiFreq().clean_time_index(ws, params)
 
@@ -618,7 +629,6 @@ class CleanMultiColumnsMultiFreqTestCase(unittest.TestCase):
 
 
 class BaseMultiFrequencyTestCase(unittest.TestCase):
-
     def test_init_progression_args(self):
 
         freq_args = BaseMultiFrequency._init_last_time_dict("AQQQQ")

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 test_get_data_strategies
 
@@ -29,7 +28,6 @@ GetMultiFrequencyContinuous = type("CleanSingleColumn", bases, {})
 
 # @unittest.skip("skip")
 class MissingsTestCase(unittest.TestCase):
-
     def _get_values(self, ws, ini_row, end_row, col):
 
         values = []
@@ -54,18 +52,16 @@ class MissingsTestCase(unittest.TestCase):
         ws["A7"] = arrow.get(2015, 6, 22).datetime
         ws["A8"] = arrow.get(2015, 6, 23).datetime
 
-        values = range(8)
+        values = list(range(8))
         frequency = "D"
         time_header_coord = "A1"
         ini_row = 1
         end_row = 8
         exp_values = [0, 1, 2, np.NaN, np.NaN, 3, 4, 5, np.NaN, 6, 7]
 
-        new_values = strategy._fill_implicit_missings(ws, values, frequency,
-                                                      time_header_coord,
-                                                      ini_row,
-                                                      end_row,
-                                                      "vertical")
+        new_values = strategy._fill_implicit_missings(
+            ws, values, frequency, time_header_coord, ini_row, end_row,
+            "vertical")
 
         self.assertEqual(len(new_values), len(exp_values))
         self.assertTrue(compare_list_values(new_values, exp_values))
@@ -84,25 +80,22 @@ class MissingsTestCase(unittest.TestCase):
         ws["G1"] = arrow.get(2015, 6, 22).datetime
         ws["H1"] = arrow.get(2015, 6, 23).datetime
 
-        values = range(8)
+        values = list(range(8))
         frequency = "D"
         time_header_coord = "A1"
         ini_col = 1
         end_col = 8
         exp_values = [0, 1, 2, np.NaN, np.NaN, 3, 4, 5, np.NaN, 6, 7]
 
-        new_values = strategy._fill_implicit_missings(ws, values, frequency,
-                                                      time_header_coord,
-                                                      ini_col,
-                                                      end_col,
-                                                      "horizontal")
+        new_values = strategy._fill_implicit_missings(
+            ws, values, frequency, time_header_coord, ini_col, end_col,
+            "horizontal")
 
         self.assertEqual(len(new_values), len(exp_values))
         self.assertTrue(compare_list_values(new_values, exp_values))
 
 
 class BaseGetDataStrategyTestCase(unittest.TestCase):
-
     def setUp(self):
         self.base_class = BaseGetDataStrategy
 
@@ -129,14 +122,16 @@ class BaseGetDataStrategyTestCase(unittest.TestCase):
         self.assertEqual(name, "1")
 
     def test_get_name_composed(self):
-        name = self.base_class._get_name(self.ws, header_coord="B1",
-                                         composed_headers_coord=["A1"])
+        name = self.base_class._get_name(
+            self.ws, header_coord="B1", composed_headers_coord=["A1"])
         self.assertEqual(name, "A Agricultural")
 
     def test_get_name_context(self):
-        name = self.base_class._get_name(self.ws, header_coord="B1",
-                                         composed_headers_coord=["A1"],
-                                         context=["GDP"])
+        name = self.base_class._get_name(
+            self.ws,
+            header_coord="B1",
+            composed_headers_coord=["A1"],
+            context=["GDP"])
         self.assertEqual(name, "GDP - A Agricultural")
 
 

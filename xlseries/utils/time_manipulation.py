@@ -1,26 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 time_manipulation
 
 Small useful time related methods.
 """
 
-from __future__ import unicode_literals
 import arrow
 import datetime
-from comparing import approx_equal
+from .comparing import approx_equal
 
 
 class InvalidTimeFrequency(Exception):
-
     """Raised when the frequency passed isn't valid."""
 
     def __init__(self, time, frequency):
-        msg = " ".join(["Frequency is invalid for incrementing time.\n",
-                        "Time:", unicode(time),
-                        "Frequency:", unicode(frequency)])
+        msg = " ".join([
+            "Frequency is invalid for incrementing time.\n", "Time:",
+            str(time), "Frequency:",
+            str(frequency)
+        ])
         super(InvalidTimeFrequency, self).__init__(msg)
 
 
@@ -36,14 +35,16 @@ def increment_time(time, num, freq):
     if type(time) == datetime.datetime:
         time = arrow.get(time)
 
-    freqs = {"S": "seconds",
-             "T": "minutes",
-             "H": "hours",
-             "D": "days",
-             "W": "weeks",
-             "M": "months",
-             "Q": "quarters",  # not a valid timedelta key
-             "A": "years"}
+    freqs = {
+        "S": "seconds",
+        "T": "minutes",
+        "H": "hours",
+        "D": "days",
+        "W": "weeks",
+        "M": "months",
+        "Q": "quarters",  # not a valid timedelta key
+        "A": "years"
+    }
 
     # calculate shifted time if frequency is valid
     if freq in freqs:

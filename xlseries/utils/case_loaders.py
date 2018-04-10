@@ -1,21 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 case_loaders
 
 Auxiliar methods to quickly load an integration case file.
 """
 
-from __future__ import unicode_literals
 import os
 from openpyxl import load_workbook
 
 from xlseries.strategies.discover.parameters import Parameters
-from data_frame import get_data_frames, compare_data_frames
-from path_finders import get_orig_cases_dir
-from path_finders import get_param_cases_dir
-from path_finders import get_exp_cases_dir
+from .data_frame import get_data_frames, compare_data_frames
+from .path_finders import get_orig_cases_dir
+from .path_finders import get_param_cases_dir
+from .path_finders import get_exp_cases_dir
 
 
 def check_case_exp_result(case_num, dfs):
@@ -32,7 +30,7 @@ def check_case_exp_result(case_num, dfs):
     for df, exp_df in zip(dfs, load_expected_case(case_num)):
         compare_data_frames(df, exp_df)
 
-    print "OK"
+    print("OK")
 
 
 def load_original_case(case_num=1, special_case=None, **loader_args):
@@ -104,6 +102,5 @@ def load_expected_case(case_num=1, special_case=None):
 
 
 def _gen_filename(case_num=1, special_case="", file_format="xlsx"):
-        special_case = special_case or ""
-        return "test_case{}{}.{}".format(case_num, special_case, file_format)
-
+    special_case = special_case or ""
+    return "test_case{}{}.{}".format(case_num, special_case, file_format)

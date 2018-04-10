@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 data
 
@@ -13,7 +12,6 @@ Rather import the module in which the Class is defined and use it like
 automatically taken by "get_strategies" and exposed to the user.
 """
 
-from __future__ import unicode_literals
 from pprint import pprint
 import arrow
 import datetime
@@ -26,7 +24,6 @@ from xlseries.utils.time_manipulation import increment_time
 
 
 class BaseGetDataStrategy(object):
-
     """Implements the interface for all get data strategies."""
 
     # PUBLIC INTERFACE
@@ -46,8 +43,7 @@ class BaseGetDataStrategy(object):
     def _get_data(self, ws, params):
         name = self._get_name(ws, params["headers_coord"],
                               params["composed_headers_coord"],
-                              params["context"],
-                              params["series_names"])
+                              params["context"], params["series_names"])
         # print name
         values_list = self._get_values(ws, params)
         # print params["data_ends"]
@@ -55,8 +51,12 @@ class BaseGetDataStrategy(object):
         return [(name, values) for values in values_list]
 
     @classmethod
-    def _get_name(cls, ws, header_coord, composed_headers_coord=None,
-                  context=None, series_names=None):
+    def _get_name(cls,
+                  ws,
+                  header_coord,
+                  composed_headers_coord=None,
+                  context=None,
+                  series_names=None):
         """Get the header name of a series.
 
         Args:
@@ -76,24 +76,32 @@ class BaseGetDataStrategy(object):
             name = series_names
 
         else:
-            name = unidecode(unicode(ws[header_coord].value)).strip()
+            name = unidecode(str(ws[header_coord].value)).strip()
 
             if composed_headers_coord:
-                msg = " ".join(["Composed is not list",
-                                repr(type(composed_headers_coord)),
-                                repr(composed_headers_coord)])
+                msg = " ".join([
+                    "Composed is not list",
+                    repr(type(composed_headers_coord)),
+                    repr(composed_headers_coord)
+                ])
                 assert type(composed_headers_coord) == list, msg
 
-                name = " ".join([unidecode(ws[coord].value).strip() for
-                                 coord in composed_headers_coord] + [name])
+                name = " ".join([
+                    unidecode(ws[coord].value).strip()
+                    for coord in composed_headers_coord
+                ] + [name])
 
             if context:
-                msg = " ".join(["Context is not list", repr(type(context)),
-                                repr(context)])
+                msg = " ".join([
+                    "Context is not list",
+                    repr(type(context)),
+                    repr(context)
+                ])
                 assert type(context) == list, msg
 
-                name = " - ".join([header_context.strip() for
-                                   header_context in context] + [name])
+                name = " - ".join(
+                    [header_context.strip()
+                     for header_context in context] + [name])
 
         return name
 
@@ -102,15 +110,13 @@ class BaseGetDataStrategy(object):
         # create iterator of values
         iter_values = self._values_iterator(ws, p["alignment"],
                                             p["headers_coord"],
-                                            p["data_starts"],
-                                            p["data_ends"])
+                                            p["data_starts"], p["data_ends"])
 
         values_dict = collections.OrderedDict()
         for value, index in iter_values:
-            new_value = self._handle_new_value(values_dict.values(), value,
-                                               p["missings"],
-                                               p["missing_value"],
-                                               p["blank_rows"])
+            new_value = self._handle_new_value(
+                list(values_dict.values()), value, p["missings"],
+                p["missing_value"], p["blank_rows"])
 
             if self._value_to_be_added(new_value, index, ws, p):
                 frequency = self._get_frequency(p["frequency"])
@@ -120,31 +126,27 @@ class BaseGetDataStrategy(object):
 
         # fill the missing values if they are implicit
         # it doesn't work with multifrequency series
-        if (p["missings"] and "Implicit" in p["missing_value"] and
-                len(p["frequency"]) == 1):
-            values = values_dict.values()[0]
-            values = self._fill_implicit_missings(ws,
-                                                  values,
-                                                  p["frequency"],
-                                                  p["time_header_coord"],
-                                                  p["data_starts"],
-                                                  p["data_ends"],
-                                                  p["alignment"])
+        if (p["missings"] and "Implicit" in p["missing_value"]
+                and len(p["frequency"]) == 1):
+            values = list(values_dict.values())[0]
+            values = self._fill_implicit_missings(
+                ws, values, p["frequency"], p["time_header_coord"],
+                p["data_starts"], p["data_ends"], p["alignment"])
             return [values]
 
-        return values_dict.values()
+        return list(values_dict.values())
 
     @classmethod
     def _values_iterator(cls, ws, alignment, header_coord, ini, end):
 
         if alignment == "vertical":
             col = ws[header_coord].column
-            for row in xrange(ini, end + 1):
-                yield (ws[col + unicode(row)].value, row)
+            for row in range(ini, end + 1):
+                yield (ws[col + str(row)].value, row)
 
         elif alignment == "horizontal":
             row = ws[header_coord].row
-            for col in xrange(ini, end + 1):
+            for col in range(ini, end + 1):
                 yield (ws.cell(column=col, row=row).value, col)
 
         else:
@@ -155,12 +157,12 @@ class BaseGetDataStrategy(object):
     def _time_index_iterator(cls, ws, alignment, time_header_coord, ini, end):
 
         if alignment == "vertical":
-            for row in xrange(ini, end + 1):
+            for row in range(ini, end + 1):
                 col = cls._time_header_cell(ws, time_header_coord).column
-                yield ws[col + unicode(row)].value
+                yield ws[col + str(row)].value
 
         elif alignment == "horizontal":
-            for col in xrange(ini, end + 1):
+            for col in range(ini, end + 1):
                 row = cls._time_header_cell(ws, time_header_coord).row
                 yield ws.cell(column=col, row=row).value
 
@@ -191,7 +193,6 @@ class BaseGetDataStrategy(object):
 
 
 class BaseAccepts():
-
     """Provide the basic accepts conditions resolution."""
 
     @classmethod
@@ -202,14 +203,13 @@ class BaseAccepts():
     def _base_cond(cls, ws, params):
         """Check that all base classes accept the input."""
         for base in cls.__bases__:
-            if (base is not BaseGetDataStrategy and
-                    not base._accepts(ws, params)):
+            if (base is not BaseGetDataStrategy
+                    and not base._accepts(ws, params)):
                 return False
         return True
 
 
 class BaseSingleFrequency():
-
     @classmethod
     def _accepts(cls, ws, params):
         return len(params["frequency"]) == 1
@@ -245,7 +245,6 @@ class BaseSingleFrequency():
 
 
 class BaseMultiFrequency():
-
     def __init__(self):
         self.last_frequency = None
 
@@ -254,8 +253,8 @@ class BaseMultiFrequency():
         return len(params["frequency"]) > 1
 
     def _get_frequency(self, frequency):
-        freq, self.last_frequency = self._next_frequency(frequency,
-                                                         self.last_frequency)
+        freq, self.last_frequency = self._next_frequency(
+            frequency, self.last_frequency)
         return freq
 
     @classmethod
@@ -286,7 +285,6 @@ class BaseMultiFrequency():
 
 
 class BaseContinuous():
-
     """Get data from continuous series."""
 
     @classmethod
@@ -306,7 +304,7 @@ class BaseContinuous():
             return None
 
         if missings:
-            if isinstance(value, str) or isinstance(value, unicode):
+            if isinstance(value, str) or isinstance(value, str):
                 value = value.strip()
 
             if value not in missing_value:
@@ -316,7 +314,7 @@ class BaseContinuous():
                     return float(value)
                 except:
                     # print args_without_values
-                    raise Exception("Value is not valid " + unicode(value))
+                    raise Exception("Value is not valid " + str(value))
             else:
                 return np.nan
         else:
@@ -324,7 +322,6 @@ class BaseContinuous():
 
 
 class BaseNonContinuous():
-
     """Get data from non continuous series."""
 
     @classmethod
@@ -346,13 +343,13 @@ class BaseNonContinuous():
 
         if params["alignment"] == "vertical":
             time_col = ws[time_header_coord].column
-            time_coord = time_col + unicode(index + params["time_alignment"])
+            time_coord = time_col + str(index + params["time_alignment"])
             time_value = ws[time_coord].value
 
         elif params["alignment"] == "horizontal":
             time_row = ws[time_header_coord].row
-            time_value = ws.cell(column=index + params["time_alignment"],
-                                 row=time_row).value
+            time_value = ws.cell(
+                column=index + params["time_alignment"], row=time_row).value
 
         else:
             raise Exception("Series alignment must be 'vertical' or " +
@@ -363,8 +360,8 @@ class BaseNonContinuous():
     @classmethod
     def _handle_new_value(cls, values, value, missings, missing_value,
                           blank_rows):
-        if ((type(value) == str or type(value) == unicode) and
-                value.strip() == ""):
+        if ((type(value) == str or type(value) == str)
+                and value.strip() == ""):
             value = None
 
         new_value = None
@@ -397,6 +394,7 @@ def get_strategies():
             combinations.append(parser)
 
     return custom + combinations
+
 
 if __name__ == '__main__':
     pprint(sorted(xlseries.utils.strategies_helpers.get_strategies_names()))

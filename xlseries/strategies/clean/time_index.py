@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 clean_ti_strategies
 
@@ -30,17 +29,18 @@ import xlseries.strategies.clean.parse_time as parse_time_strategies
 
 # CUSTOM EXCEPTIONS
 class BaseProgressionError(ValueError):
-
     """Raised when the progression of a time value is wrong."""
 
     def get_msg(self, curr_time, exp_time, last_time):
-        return " ".join(["Last:", unicode(last_time),
-                         "\nExpected:", unicode(exp_time),
-                         "\nCurrent:", unicode(curr_time)])
+        return " ".join([
+            "Last:",
+            str(last_time), "\nExpected:",
+            str(exp_time), "\nCurrent:",
+            str(curr_time)
+        ])
 
 
 class TimeValueGoingBackwards(BaseProgressionError):
-
     """Raised when a time value is going backwards.
 
     The parser observe that a time value is going backwards and
@@ -52,7 +52,6 @@ class TimeValueGoingBackwards(BaseProgressionError):
 
 
 class TimeValueGoingForth(BaseProgressionError):
-
     """Raised when time value is going forth, when not supposed to.
 
     The parser observe that a time value is going forth than expected
@@ -64,35 +63,39 @@ class TimeValueGoingForth(BaseProgressionError):
 
 
 class ParseTimeImplementationError(NotImplementedError):
-
     """Raised when parsing to date data structure is impossible.
 
     There is no strategy to deal with the time value that is trying to be
     parsed."""
 
     def __init__(self, curr_time, last_time, next_time, params):
-        msg = " ".join(["No strategy to parse time.",
-                        "\nCurrent:", repr(
-                            curr_time), repr(type(curr_time)),
-                        "\nLast:", repr(last_time), repr(type(last_time)),
-                        "\nNext:", repr(next_time), repr(type(next_time)),
-                        "\nParameters: ", pformat(params)])
+        msg = " ".join([
+            "No strategy to parse time.", "\nCurrent:",
+            repr(curr_time),
+            repr(type(curr_time)), "\nLast:",
+            repr(last_time),
+            repr(type(last_time)), "\nNext:",
+            repr(next_time),
+            repr(type(next_time)), "\nParameters: ",
+            pformat(params)
+        ])
         super(ParseTimeImplementationError, self).__init__(msg)
 
 
 class SameTimeValue(ValueError):
-
     """Raised if the value is the same as the last one."""
 
     def __init__(self, value, last_value):
-        msg = " ".join(["Current value", unicode(value),
-                        "is the same as the last value", unicode(last_value)])
+        msg = " ".join([
+            "Current value",
+            str(value), "is the same as the last value",
+            str(last_value)
+        ])
         super(SameTimeValue, self).__init__(msg)
 
 
 # STRATEGIES
 class BaseCleanTiStrategy(object):
-
     """BaseCleanTiStrategy class for all time index cleaning strategies."""
 
     NO_TIME_VALUE_LIMIT = 40
@@ -138,11 +141,9 @@ class BaseCleanTiStrategy(object):
                                                  next_time)
 
                     # correct typos checking for a healthy time progression
-                    curr_time = self._correct_progression(last_time,
-                                                          curr_time,
-                                                          p["frequency"],
-                                                          p["missings"],
-                                                          p["missing_value"])
+                    curr_time = self._correct_progression(
+                        last_time, curr_time, p["frequency"], p["missings"],
+                        p["missing_value"])
 
                     # avoid writing the same time value again, except in the
                     # multifrequency case, where year could be equal to the
@@ -164,18 +165,17 @@ class BaseCleanTiStrategy(object):
                         NoTimeValue, SameTimeValue, AssertionError):
 
                     if not p["data_ends"]:
-                        return self._estimate_end(p["alignment"],
-                                                  write_time_cell,
-                                                  p["data_starts"],
-                                                  p["time_alignment"])
+                        return self._estimate_end(
+                            p["alignment"], write_time_cell, p["data_starts"],
+                            p["time_alignment"])
                     else:
                         raise
 
                 except:
                     raise
 
-            elif (no_time_value_count < self.NO_TIME_VALUE_LIMIT and
-                  (not p["continuity"] or p["blank_rows"])):
+            elif (no_time_value_count < self.NO_TIME_VALUE_LIMIT
+                  and (not p["continuity"] or p["blank_rows"])):
                 no_time_value_count += 1
 
             else:
@@ -186,25 +186,24 @@ class BaseCleanTiStrategy(object):
 
     @classmethod
     def _must_be_time_value(cls, value, next_time, last_time):
-        return ((value is not None) and (len(unicode(value).strip()) > 0))
+        return ((value is not None) and (len(str(value).strip()) > 0))
 
     @classmethod
     def _estimate_end(cls, alignment, last_cell, start, time_alignment):
         if alignment == "vertical":
-            while (type(last_cell.value) != datetime.datetime and
-                    last_cell.row > start):
+            while (type(last_cell.value) != datetime.datetime
+                   and last_cell.row > start):
                 last_cell = last_cell.offset(row=-1)
 
             end = last_cell.row - time_alignment
             msg = "End must be greater than start! End: {} / Start: {}".format(
-                repr(end).ljust(6), start
-            )
+                repr(end).ljust(6), start)
             assert end and end > start, msg
             return end
 
         else:
-            while (type(last_cell.value) != datetime.datetime and
-                    last_cell.column > start):
+            while (type(last_cell.value) != datetime.datetime
+                   and last_cell.column > start):
                 # print type(last_cell.value), last_cell.value, last_cell.row,
                 # last_cell.column, type(last_cell.offset(row=2).value),
                 # last_cell.offset(row=2).value, last_cell.offset(row=2).row,
@@ -213,33 +212,36 @@ class BaseCleanTiStrategy(object):
 
             end = column_index_from_string(last_cell.column) - time_alignment
             msg = "End must be greater than start! End: {} | Start: {}".format(
-                end, start
-            )
+                end, start)
             assert end and end > start, msg
             return end
 
     # PRIVATE time index iterator methods
     @classmethod
-    def _time_index_iterator(cls, ws, alignment, time_header_coord, ini,
+    def _time_index_iterator(cls,
+                             ws,
+                             alignment,
+                             time_header_coord,
+                             ini,
                              end=None):
 
         if alignment == "vertical":
             end = end or cls._get_row_boundary(ws, time_header_coord, ini)
-            for row in xrange(ini, end + 1):
-                curr_time = cls._get_time_value(ws, time_header_coord,
-                                                f_row=row)
-                next_time = cls._get_time_value(ws, time_header_coord,
-                                                f_row=row + 1)
+            for row in range(ini, end + 1):
+                curr_time = cls._get_time_value(
+                    ws, time_header_coord, f_row=row)
+                next_time = cls._get_time_value(
+                    ws, time_header_coord, f_row=row + 1)
                 col = cls._time_header_cell(ws, time_header_coord).column
-                write_time_cell = ws[col + unicode(row)]
+                write_time_cell = ws[col + str(row)]
 
                 yield (curr_time, next_time, write_time_cell)
 
         elif alignment == "horizontal":
             end = end or cls._get_column_boundary(ws, time_header_coord, ini)
-            for col in xrange(ini, end + 1):
-                curr_time = cls._get_time_value(ws, time_header_coord,
-                                                f_col=get_column_letter(col))
+            for col in range(ini, end + 1):
+                curr_time = cls._get_time_value(
+                    ws, time_header_coord, f_col=get_column_letter(col))
                 next_time = cls._get_time_value(
                     ws, time_header_coord, f_col=get_column_letter(col + 1))
                 row = cls._time_header_cell(ws, time_header_coord).row
@@ -254,14 +256,14 @@ class BaseCleanTiStrategy(object):
     @classmethod
     def _get_row_boundary(cls, ws, time_header_coord, ini):
         """Returns the pressumed last row of a column."""
-        raise NotImplementedError("Getting the row boundary must be " +
-                                  "implemented in a subclass.")
+        raise NotImplementedError(
+            "Getting the row boundary must be " + "implemented in a subclass.")
 
     @classmethod
     def _get_time_value(cls, ws, time_header_coord, f_row=None, f_col=None):
         """Returns the time value corresponding a certain series and row."""
-        raise NotImplementedError("Getting the time value must be " +
-                                  "implemented in a subclass.")
+        raise NotImplementedError(
+            "Getting the time value must be " + "implemented in a subclass.")
 
     @classmethod
     def _time_header_cell(cls, ws, time_header_coord):
@@ -292,8 +294,8 @@ class BaseCleanTiStrategy(object):
         # first, try to use the parser used last time
         if self.time_parser:
             try:
-                time_value = self.time_parser.parse_time(params, curr_time,
-                                                         last_time, next_time)
+                time_value = self.time_parser.parse_time(
+                    params, curr_time, last_time, next_time)
                 assert type(time_value) == arrow.Arrow, msg
 
                 return time_value
@@ -308,8 +310,8 @@ class BaseCleanTiStrategy(object):
         for strategy in parse_time_strategies.get_strategies():
             if strategy.accepts(params, curr_time, last_time, next_time):
                 self.time_parser = strategy()
-                time_value = self.time_parser.parse_time(params, curr_time,
-                                                         last_time, next_time)
+                time_value = self.time_parser.parse_time(
+                    params, curr_time, last_time, next_time)
 
                 assert type(time_value) == arrow.Arrow, msg
 
@@ -320,8 +322,12 @@ class BaseCleanTiStrategy(object):
 
     # PRIVATE methods to correct progression
     @classmethod
-    def _correct_progression(cls, last_time, curr_time,
-                             freq, missings, missing_value=None):
+    def _correct_progression(cls,
+                             last_time,
+                             curr_time,
+                             freq,
+                             missings,
+                             missing_value=None):
 
         # without a last_time the progression cannot be corrected
         if not last_time:
@@ -341,8 +347,7 @@ class BaseCleanTiStrategy(object):
             if cls._time_value_typo(curr_time, exp_time):
                 return exp_time
             else:
-                raise TimeValueGoingBackwards(curr_time, exp_time,
-                                              last_time)
+                raise TimeValueGoingBackwards(curr_time, exp_time, last_time)
 
         # going forth with no missings allowed
         going_forth = curr_time > last_time
@@ -350,16 +355,15 @@ class BaseCleanTiStrategy(object):
             if cls._time_value_typo(curr_time, exp_time):
                 return exp_time
             else:
-                raise TimeValueGoingForth(curr_time, exp_time,
-                                          last_time)
+                raise TimeValueGoingForth(curr_time, exp_time, last_time)
 
         # going forth with implicit missings
         max_forth_time_value = increment_time(last_time,
                                               cls._max_forth_units(freq), freq)
         going_too_forth = curr_time > max_forth_time_value
         if going_too_forth and missings and missing_value == "Implicit":
-            forth_time_value = cls._forth_time_value_typo(curr_time,
-                                                          max_forth_time_value)
+            forth_time_value = cls._forth_time_value_typo(
+                curr_time, max_forth_time_value)
             if forth_time_value:
                 return forth_time_value
             else:
@@ -371,10 +375,7 @@ class BaseCleanTiStrategy(object):
 
     @classmethod
     def _max_forth_units(cls, freq):
-        max_forth_units = {"D": 20,
-                           "M": 2,
-                           "Q": 1,
-                           "A": 1}
+        max_forth_units = {"D": 20, "M": 2, "Q": 1, "A": 1}
         if freq in max_forth_units:
             return max_forth_units[freq]
         else:
@@ -422,16 +423,13 @@ class BaseCleanTiStrategy(object):
                 if the typo couldn't be fixed.
         """
 
-        day_typo = arrow.get(curr_time.year,
-                             curr_time.month,
+        day_typo = arrow.get(curr_time.year, curr_time.month,
                              max_forth_time_value.day)
 
-        month_typo = arrow.get(curr_time.year,
-                               max_forth_time_value.month,
+        month_typo = arrow.get(curr_time.year, max_forth_time_value.month,
                                curr_time.day)
 
-        year_typo = arrow.get(max_forth_time_value.year,
-                              curr_time.month,
+        year_typo = arrow.get(max_forth_time_value.year, curr_time.month,
                               curr_time.day)
 
         for possible_typo in [day_typo, month_typo, year_typo]:
@@ -442,7 +440,6 @@ class BaseCleanTiStrategy(object):
 
 
 class BaseAccepts():
-
     """Provide the basic accepts conditions resolution."""
 
     @classmethod
@@ -453,15 +450,13 @@ class BaseAccepts():
     def _base_cond(cls, ws, params):
         """Check that all base classes accept the input."""
         for base in cls.__bases__:
-            if (base is not BaseCleanTiStrategy and
-                base is not cls and
-                    not base._accepts(ws, params)):
+            if (base is not BaseCleanTiStrategy and base is not cls
+                    and not base._accepts(ws, params)):
                 return False
         return True
 
 
 class BaseSingleTable():
-
     """Presumes the sheet has a single table on it."""
 
     # PRIVATE INTERFACE METHODS
@@ -481,17 +476,13 @@ class BaseSingleTable():
 
 
 class BaseMultiTable():
-
     """Presumes the sheet has many tables on it."""
 
     # PRIVATE INTERFACE METHODS
     @classmethod
     def _accepts(cls, ws, params):
-        return (
-            not params["blank_rows"] and
-            params["continuity"] and not
-            params["data_ends"]
-        )
+        return (not params["blank_rows"] and params["continuity"]
+                and not params["data_ends"])
 
     @classmethod
     def _get_row_boundary(cls, ws, time_header_coord, ini):
@@ -511,7 +502,6 @@ class BaseMultiTable():
 
 
 class BaseSingleColumn():
-
     """Clean time indexes that use a single column."""
 
     # PRIVATE INTERFACE METHODS
@@ -524,14 +514,13 @@ class BaseSingleColumn():
         """Returns the time value corresponding a certain series and row."""
         assert type(time_header_coord) != list, "Time header should be a str."
 
-        col = unicode(f_col or ws[time_header_coord].column)
-        row = unicode(f_row or ws[time_header_coord].row)
+        col = str(f_col or ws[time_header_coord].column)
+        row = str(f_row or ws[time_header_coord].row)
 
         return ws[col + row].value
 
 
 class BaseMultipleColumns():
-
     """Clean time indexes that use a single column."""
 
     # PRIVATE INTERFACE METHODS
@@ -550,8 +539,8 @@ class BaseMultipleColumns():
         time_value_list = []
 
         for coord in time_header_coord:
-            col = unicode(f_col or ws[coord].column)
-            row = unicode(f_row or ws[coord].row)
+            col = str(f_col or ws[coord].column)
+            row = str(f_row or ws[coord].row)
             value = ws[col + row].value
 
             msg = "there shouldn't be time values in multicolumn!"
@@ -571,13 +560,12 @@ class BaseMultipleColumns():
     def _safe_unicode(cls, value):
         """Check if the value is a number before make it unicode."""
         try:
-            return unicode(int(value))
+            return str(int(value))
         except:
-            return unicode(value)
+            return str(value)
 
 
 class BaseOffsetTi():
-
     """Clean time indexes where time alignment is offset, sharing the same
     column with the data."""
 
@@ -587,14 +575,12 @@ class BaseOffsetTi():
 
     @classmethod
     def _must_be_time_value(cls, value, next_time, last_time):
-        base_cond = BaseCleanTiStrategy._must_be_time_value(value,
-                                                            next_time,
-                                                            last_time)
+        base_cond = BaseCleanTiStrategy._must_be_time_value(
+            value, next_time, last_time)
         return base_cond and type(value) != float
 
 
 class BaseNoOffsetTi():
-
     """Clean time indexes where time alignment is 0, the most common case."""
 
     @classmethod
@@ -603,7 +589,6 @@ class BaseNoOffsetTi():
 
 
 class BaseSingleFrequency():
-
     """Only accepts single frequency series."""
 
     @classmethod
@@ -612,7 +597,6 @@ class BaseSingleFrequency():
 
 
 class BaseMultiFrequency():
-
     """Reimplements private methods for multifrequency series."""
 
     def __init__(self, *args, **kwargs):
@@ -624,21 +608,24 @@ class BaseMultiFrequency():
     def _accepts(cls, ws, params):
         return len(params["frequency"]) > 1
 
-    def _correct_progression(self, last_time, curr_time,
-                             frequency, missings, missing_value=None):
+    def _correct_progression(self,
+                             last_time,
+                             curr_time,
+                             frequency,
+                             missings,
+                             missing_value=None):
         if len(self.last_time) == 0:
             self.last_time = self._init_last_time_dict(frequency)
 
         # frequency and last_time are replaced simulating two single frequency
         # series instead of one multifrequency
-        freq, self.last_frequency = self._next_frequency(frequency,
-                                                         self.last_frequency)
+        freq, self.last_frequency = self._next_frequency(
+            frequency, self.last_frequency)
         last_time = self.last_time[freq]
 
         superclass = BaseCleanTiStrategy
-        curr_time = superclass._correct_progression(last_time, curr_time,
-                                                    freq, missings,
-                                                    missing_value)
+        curr_time = superclass._correct_progression(last_time, curr_time, freq,
+                                                    missings, missing_value)
         self.last_time[freq] = curr_time
         return curr_time
 
@@ -683,14 +670,10 @@ def get_strategies():
             for freq in [BaseSingleFrequency, BaseMultiFrequency]:
                 for col in [BaseSingleColumn, BaseMultipleColumns]:
 
-                    name = "{}{}{}{}".format(
-                        table.__name__,
-                        col.__name__,
-                        freq.__name__,
-                        offset.__name__
-                    )
-                    bases = (BaseAccepts, table, col, freq,
-                             offset, BaseCleanTiStrategy)
+                    name = "{}{}{}{}".format(table.__name__, col.__name__,
+                                             freq.__name__, offset.__name__)
+                    bases = (BaseAccepts, table, col, freq, offset,
+                             BaseCleanTiStrategy)
                     parser = type(name, bases, {})
 
                     combinations.append(parser)

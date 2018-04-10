@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 test_time_manipulation
 ----------------------------------
@@ -17,7 +16,6 @@ from xlseries.utils.time_manipulation import infer_freq
 
 
 class TimeManipulationTest(unittest.TestCase):
-
     def test_increment_time(self):
         time = arrow.get(2015, 12, 1)
 

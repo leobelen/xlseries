@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 test_period_range
 
 Tests for `period_range` module.
 """
 
-from __future__ import unicode_literals
 import unittest
 import nose
 from openpyxl import Workbook
@@ -20,7 +18,6 @@ from xlseries.strategies.get.period_range import GetPeriodRangesMultifrequency
 
 
 class GetPeriodRangesSingleFrequencyTestCase(unittest.TestCase):
-
     def test_get_period_ranges_vertical(self):
         test_class = GetPeriodRangesSingleFrequency
         wb = Workbook()
@@ -65,7 +62,6 @@ class GetPeriodRangesSingleFrequencyTestCase(unittest.TestCase):
 
 
 class GetPeriodRangesMultifrequencyTestCase(unittest.TestCase):
-
     def test_get_period_ranges_vertical(self):
         test_class = GetPeriodRangesMultifrequency
         wb = Workbook()

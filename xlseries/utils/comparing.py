@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 comparing
 
 Auxiliar methods to compare approximate values.
 """
 
-from __future__ import unicode_literals
 import numpy as np
 
 
@@ -28,7 +26,7 @@ def approx_equal(a, b, tolerance=0.00001):
     if a == b:
         RV = True
 
-    elif type(a) == unicode and type(b) == unicode:
+    elif type(a) == str and type(b) == str:
         RV = a == b
 
     elif (not a) and (not b):
@@ -42,8 +40,12 @@ def approx_equal(a, b, tolerance=0.00001):
         RV = _approx_equal(a, b, tolerance)
 
     else:
-        msg = " ".join([repr(type(a)), repr(a), repr(type(b)),
-                        repr(b), "cannot be compared."])
+        msg = " ".join([
+            repr(type(a)),
+            repr(a),
+            repr(type(b)),
+            repr(b), "cannot be compared."
+        ])
         raise NotImplementedError(msg)
 
     return RV

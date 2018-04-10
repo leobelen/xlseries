@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 strategies_helpers
 
@@ -14,7 +13,6 @@ interface expected by the user of the strategies:
     - Parameters class is not passed
 """
 
-from __future__ import unicode_literals
 import inspect
 
 
@@ -25,10 +23,11 @@ def get_strategies_names(parent_level=2):
 
     parent_classes = get_parent_module_classes(parent_level)
 
-    cls_names = [cls_name for cls_name in parent_classes if
-                 cls_name[:4] != "Base" and
-                 cls_name != "Parameters" and
-                 not issubclass(parent_classes[cls_name], Exception)]
+    cls_names = [
+        cls_name for cls_name in parent_classes
+        if cls_name[:4] != "Base" and cls_name != "Parameters"
+        and not issubclass(parent_classes[cls_name], Exception)
+    ]
 
     return cls_names
 
@@ -45,8 +44,10 @@ def get_strategies(parent_level=2):
     """
 
     parent_classes = get_parent_module_classes(parent_level)
-    return [parent_classes[cls_name] for cls_name in
-            get_strategies_names(parent_level + 1)]
+    return [
+        parent_classes[cls_name]
+        for cls_name in get_strategies_names(parent_level + 1)
+    ]
 
 
 def get_parent_module_classes(parent_level):
@@ -66,5 +67,7 @@ def get_parent_module_classes(parent_level):
     parent_frame = inspect.stack()[parent_level][0]
     parent_module = inspect.getmodule(parent_frame)
 
-    return {cls_tupl[0]: cls_tupl[1] for cls_tupl in
-            inspect.getmembers(parent_module, inspect.isclass)}
+    return {
+        cls_tupl[0]: cls_tupl[1]
+        for cls_tupl in inspect.getmembers(parent_module, inspect.isclass)
+    }

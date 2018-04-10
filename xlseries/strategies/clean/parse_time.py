@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 parse_time
 
@@ -12,7 +11,6 @@ The preconditions of all the strategies is that the strings passed to them must
 be time values, otherwise an exception will be raised.
 """
 
-from __future__ import unicode_literals
 from pprint import pprint
 import arrow
 import datetime
@@ -26,68 +24,68 @@ import xlseries.utils.strategies_helpers
 
 # EXCEPTIONS
 class NoPossibleTimeValue(ValueError):
-
     """Raised if the value is not a possible time value."""
 
     def __init__(self, value):
-        msg = " ".join([unicode(type(value)), unicode(value),
-                        "is not a possible time value."])
+        msg = " ".join(
+            [str(type(value)),
+             str(value), "is not a possible time value."])
         super(NoPossibleTimeValue, self).__init__(msg)
 
 
 class TimeIsNotComposed(ValueError):
-
     """Raised if a valid time value try to be parsed as composed.
 
     If a spreadsheet has time values already, time_composed parameter should be
     False."""
 
     def __init__(self, value):
-        msg = " ".join([unicode(type(value)), unicode(value),
-                        "is not a composed time, time_composed should be set"
-                        "False."])
+        msg = " ".join([
+            str(type(value)),
+            str(value), "is not a composed time, time_composed should be set"
+            "False."
+        ])
         super(TimeIsNotComposed, self).__init__(msg)
 
 
 class NoTimeValue(ValueError):
-
     """Raised if the value is not an arrow.Arrow time value."""
 
     def __init__(self, value, last_time=None, next_time=None):
-        msg = " ".join([unicode(type(value)), unicode(value),
-                        "is not an arrow.Arrow time value."])
+        msg = " ".join([
+            str(type(value)),
+            str(value), "is not an arrow.Arrow time value."
+        ])
         if last_time:
-            msg += "\nLast:" + unicode(last_time)
+            msg += "\nLast:" + str(last_time)
         if next_time:
-            msg += "\nNext:" + unicode(next_time)
+            msg += "\nNext:" + str(next_time)
 
         super(NoTimeValue, self).__init__(msg)
 
 
 class BaseDateMemberOutOfRange(ValueError):
-
     """Part of the result of a parsing grammar is out of range for a date."""
 
     def __init__(self, curr_time, grammar_result):
-        msg = " ".join(["Time value doesn't make sense.",
-                        unicode(curr_time), "has been converted into",
-                        unicode(grammar_result)])
+        msg = " ".join([
+            "Time value doesn't make sense.",
+            str(curr_time), "has been converted into",
+            str(grammar_result)
+        ])
         super(BaseDateMemberOutOfRange, self).__init__(msg)
 
 
 class DayOutOfRange(BaseDateMemberOutOfRange):
-
     """Raised if a day in a parsed time value is out of range."""
 
 
 class MonthOutOfRange(BaseDateMemberOutOfRange):
-
     """Raised if a month in a parsed time value is out of range."""
 
 
 # STRATEGIES
 class BaseParseTimeStrategy(object):
-
     """BaseParseTimeStrategy class for all parse time strategies."""
 
     # PUBLIC INTERFACE
@@ -111,7 +109,7 @@ class BaseParseTimeStrategy(object):
                 input.
         """
         # import pdb; pdb.set_trace()
-        if type(curr_time) == unicode or type(curr_time) == str:
+        if type(curr_time) == str or type(curr_time) == str:
             curr_time = unidecode(curr_time).strip()
 
         if cls._already_time_value(curr_time):
@@ -127,14 +125,14 @@ class BaseParseTimeStrategy(object):
                 raise NoTimeValue(last_time)
 
             if type(curr_time) == float:
-                float_to_uni = cls._accepts(params, unicode(curr_time),
-                                            last_time, next_time)
-                float_to_int = cls._accepts(params, unicode(int(curr_time)),
+                float_to_uni = cls._accepts(params, str(curr_time), last_time,
+                                            next_time)
+                float_to_int = cls._accepts(params, str(int(curr_time)),
                                             last_time, next_time)
                 # print float_to_uni, float_to_int
                 return float_to_uni or float_to_int
             else:
-                return cls._accepts(params, unicode(curr_time), last_time,
+                return cls._accepts(params, str(curr_time), last_time,
                                     next_time)
 
     def parse_time(self, params, curr_time, last_time=None, next_time=None):
@@ -149,7 +147,7 @@ class BaseParseTimeStrategy(object):
         Returns:
             An arrow.Arrow time value.
         """
-        if type(curr_time) == unicode:
+        if type(curr_time) == str:
             curr_time = unidecode(curr_time).strip()
 
         # time format is correct
@@ -159,22 +157,21 @@ class BaseParseTimeStrategy(object):
         elif type(curr_time) == datetime.datetime:
             RV = arrow.get(curr_time)
 
-        elif (type(curr_time) == str or type(curr_time) == int or
-              type(curr_time) == long):
-            RV = self._parse_time(params, unicode(curr_time), last_time,
-                                  next_time)
+        elif (type(curr_time) == str or type(curr_time) == int
+              or type(curr_time) == int):
+            RV = self._parse_time(params, str(curr_time), last_time, next_time)
         elif type(curr_time) == float:
             try:
-                RV = self._parse_time(params, unicode(int(curr_time)),
-                                      last_time, next_time)
+                RV = self._parse_time(params, str(int(curr_time)), last_time,
+                                      next_time)
             except:
-                RV = self._parse_time(params, unicode(curr_time),
-                                      last_time, next_time)
+                RV = self._parse_time(params, str(curr_time), last_time,
+                                      next_time)
         else:
-            assert type(curr_time) == unicode, "Current is not unicode."
+            assert type(curr_time) == str, "Current is not unicode."
 
-            time_value = self._parse_time(params, curr_time,
-                                          last_time, next_time)
+            time_value = self._parse_time(params, curr_time, last_time,
+                                          next_time)
 
             if not type(time_value) == arrow.Arrow:
                 raise NoTimeValue(time_value, last_time, next_time)
@@ -208,10 +205,10 @@ class BaseParseTimeStrategy(object):
         year, month, day = self._fill_parse_date_holes(result, last_time)
 
         # check date make sense
-        if day not in range(1, 32):
+        if day not in list(range(1, 32)):
             raise DayOutOfRange(curr_time, result)
 
-        if month not in range(1, 13):
+        if month not in list(range(1, 13)):
             raise MonthOutOfRange(curr_time, result)
 
         return arrow.get(year, month, day)
@@ -222,7 +219,7 @@ class BaseParseTimeStrategy(object):
         if not dob_year:
             return None
 
-        if type(dob_year) == str or type(dob_year) == unicode:
+        if type(dob_year) == str or type(dob_year) == str:
             if len(dob_year) == 4:
                 return int(dob_year)
             else:
@@ -283,7 +280,6 @@ class BaseParseTimeStrategy(object):
 
 
 class ParseSimpleTime(BaseParseTimeStrategy):
-
     """Parse dates expressed in a standard or very easy string to parse."""
     MAX_IMPL = 20
 
@@ -369,9 +365,8 @@ class ParseSimpleTime(BaseParseTimeStrategy):
             try:
                 next_time = self.parse_time(params, next_time, time_value)
                 is_before_next = time_value < next_time
-                max_forth_time_value = increment_time(time_value,
-                                                      self.MAX_IMPL,
-                                                      params["frequency"])
+                max_forth_time_value = increment_time(
+                    time_value, self.MAX_IMPL, params["frequency"])
                 is_not_too_before_next = next_time <= max_forth_time_value
 
             except NoTimeValue:
@@ -380,8 +375,8 @@ class ParseSimpleTime(BaseParseTimeStrategy):
         else:
             is_before_next, is_not_too_before_next = True, True
 
-        return (is_after_last and is_not_too_after_last and is_before_next and
-                is_not_too_before_next)
+        return (is_after_last and is_not_too_after_last and is_before_next
+                and is_not_too_before_next)
 
     @staticmethod
     def _get_possible_time_formats(str_value):
@@ -394,17 +389,16 @@ class ParseSimpleTime(BaseParseTimeStrategy):
             A possible time format for a given time string value.
         """
 
-        reps = map(len, str_value.split("-"))
+        reps = list(map(len, str_value.split("-")))
         assert len(reps) == 3, "There is no 3 date elements in " + str_value
 
         for order in ["D-M-Y", "M-D-Y", "Y-M-D"]:
-            time_format = "-".join([char * reps[i] for i, char in
-                                    enumerate(order.split("-"))])
+            time_format = "-".join(
+                [char * reps[i] for i, char in enumerate(order.split("-"))])
             yield time_format
 
 
 class BasePEG(BaseParseTimeStrategy):
-
     def __init__(self):
         self.grammar = None
 
@@ -427,7 +421,6 @@ class BasePEG(BaseParseTimeStrategy):
 
 
 class BaseComposedQuarter():
-
     """Parse dates from strings composed by substrings with date info.
     Only for quarterly series."""
 
@@ -458,8 +451,8 @@ class BaseComposedQuarter():
 
         # replace strings and convert to int
         if type(quarter_number) != int:
-            quarter_number = unicode(quarter_number)
-            for orig, new in replacements.iteritems():
+            quarter_number = str(quarter_number)
+            for orig, new in replacements.items():
                 quarter_number = quarter_number.replace(orig, new)
             quarter_number = int(quarter_number.strip())
 
@@ -476,7 +469,6 @@ class BaseComposedQuarter():
 
 
 class ParseComposedQuarter1(BaseComposedQuarter, BasePEG):
-
     """Parse quarterly dates from strings composed by substrings with date
     info of the structure showed in the example.
 
@@ -524,7 +516,6 @@ class ParseComposedQuarter1(BaseComposedQuarter, BasePEG):
 
 
 class ParseComposedQuarter2(BasePEG, BaseComposedQuarter):
-
     """Parse quarterly dates from strings composed by substrings with date
     info of the structure showed in the example.
 
@@ -555,12 +546,13 @@ class ParseComposedQuarter2(BasePEG, BaseComposedQuarter):
                 ref = ws '(' digit{1, 3} ')' ws | '*'
 
                 date = q:q not_digit* y:y ref? ws anything{0, 3} -> (dob_year(y), q_to_m(q), 1)
-                """, {"q_to_m": cls._quarter_num_to_month,
-                      "dob_year": cls._dob_year_to_four})
+                """, {
+            "q_to_m": cls._quarter_num_to_month,
+            "dob_year": cls._dob_year_to_four
+        })
 
 
 class ParseComposedQuarter3(BasePEG, BaseComposedQuarter):
-
     """Parse quarterly dates from strings composed by substrings with date
     info of the structure showed in the example.
 
@@ -592,12 +584,13 @@ class ParseComposedQuarter3(BasePEG, BaseComposedQuarter):
                 y = <digit{2}>:y -> y
 
                 date = ws ref? q:q separator* y?:y ref? ws anything{0, 3} -> (dob_year(y), q_to_m(q), 1)
-                """, {"q_to_m": cls._quarter_num_to_month,
-                      "dob_year": cls._dob_year_to_four})
+                """, {
+            "q_to_m": cls._quarter_num_to_month,
+            "dob_year": cls._dob_year_to_four
+        })
 
 
 class ParseComposedYearQuarter1(BasePEG, BaseComposedQuarter):
-
     """Parse multifrequency YQQQQ time strings like the example below.
 
     >>> orig = ["2008    Año *",
@@ -648,7 +641,6 @@ class ParseComposedYearQuarter1(BasePEG, BaseComposedQuarter):
 
 
 class ParseComposedQuarterYear1(ParseComposedYearQuarter1):
-
     """Parse multifrequency QQQQY time strings like the example below.
 
     >>> orig = ["2003 I",
@@ -717,7 +709,6 @@ class ParseComposedQuarterYear1(ParseComposedYearQuarter1):
 
 
 class BaseComposedSemester():
-
     """Parse dates from strings composed by substrings with date info.
     Only for semester series."""
 
@@ -746,8 +737,8 @@ class BaseComposedSemester():
 
         # replace strings and convert to int
         if type(semester_number) != int:
-            semester_number = unicode(semester_number)
-            for orig, new in replacements.iteritems():
+            semester_number = str(semester_number)
+            for orig, new in replacements.items():
                 semester_number = semester_number.replace(orig, new)
             semester_number = int(semester_number.strip())
 
@@ -760,7 +751,6 @@ class BaseComposedSemester():
 
 
 class ParseComposedSemester(BasePEG, BaseComposedSemester):
-
     """Parse semester dates from strings composed by substrings with date
     info of the structure showed in the example.
 
@@ -785,7 +775,8 @@ class ParseComposedSemester(BasePEG, BaseComposedSemester):
     @classmethod
     def make_parsley_grammar(cls):
         """Return a parsley parsing expression grammar."""
-        return parsley.makeGrammar("""
+        return parsley.makeGrammar(
+            """
                 separator = anything:x ?(x in "-/.S ")
                 not_digit = anything:x ?(x not in "0123456789-/. ")
                 ref = ws '(' digit{1, 3} ')' ws | '*'
@@ -794,12 +785,13 @@ class ParseComposedSemester(BasePEG, BaseComposedSemester):
                 y = <digit{2}>:y -> y
 
                 date = ws ref? s:s separator* y?:y ref? ws anything{0, 3} -> (dob_year(y), s_to_m(s), 1)
-                """, {"s_to_m": cls._semester_num_to_month,
-                      "dob_year": cls._dob_year_to_four})
+                """, {
+                "s_to_m": cls._semester_num_to_month,
+                "dob_year": cls._dob_year_to_four
+            })
 
 
 class BaseComposedMonth():
-
     """Parse dates from strings composed by substrings with date info.
     Only for quarterly series."""
 
@@ -840,7 +832,6 @@ class BaseComposedMonth():
 
 
 class ParseComposedMonth1(BasePEG, BaseComposedMonth):
-
     """Parse quarterly dates from strings composed by substrings with date
     info of the structure showed in the example.
 
@@ -885,12 +876,13 @@ class ParseComposedMonth1(BasePEG, BaseComposedMonth):
                 only_m = m:m anything* -> (None, month(m), 1)
 
                 date = y_m | m_y | only_m
-                """, {"month": cls._month_str_to_num,
-                      "year": cls._dob_year_to_four})
+                """, {
+            "month": cls._month_str_to_num,
+            "year": cls._dob_year_to_four
+        })
 
 
 class ParseComposedMonth2(BasePEG, BaseComposedMonth):
-
     """Parse quarterly dates from strings composed by substrings with date
     info of the structure showed in the example.
 
@@ -938,7 +930,6 @@ class ParseComposedMonth2(BasePEG, BaseComposedMonth):
 
 
 class BaseComposedYear():
-
     """Parse dates from strings composed by substrings with date info.
     Only for yearly series."""
 
@@ -956,7 +947,6 @@ class BaseComposedYear():
 
 
 class ParseComposedYear1(BasePEG, BaseComposedYear):
-
     """Parse yearly dates from strings composed by substrings with date
     info of the structure showed in the example.
 
@@ -995,7 +985,6 @@ class ParseComposedYear1(BasePEG, BaseComposedYear):
 
 
 class ParseComposedYear2(BasePEG, BaseComposedYear):
-
     """Parse yearly dates from agricultural campaings that follow a pattern
     like shown in the example.
 

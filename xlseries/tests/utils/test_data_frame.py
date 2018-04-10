@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 test_data_frame
 
 Tests for `data_frame` utils module.
 """
 
-from __future__ import unicode_literals
 import unittest
 import nose
 import os
@@ -21,7 +19,6 @@ from xlseries.utils.case_loaders import load_expected_case
 
 
 class XlMethodsTest(unittest.TestCase):
-
     def check_get_data_frames(self, case_num, func, file_format, directory):
         """Test functions to get data frames from files.
 
@@ -36,8 +33,8 @@ class XlMethodsTest(unittest.TestCase):
         """
 
         base_dir = os.path.join(os.path.dirname(__file__), directory)
-        path = os.path.join(base_dir, "test_case" + unicode(case_num) +
-                            "." + file_format)
+        path = os.path.join(base_dir,
+                            "test_case" + str(case_num) + "." + file_format)
         dfs = func(path)
 
         if type(dfs) == list:

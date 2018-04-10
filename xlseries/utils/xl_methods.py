@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 xl_methods
 
@@ -13,7 +12,7 @@ import xlrd
 import datetime
 import pytz
 import pandas
-from comparing import approx_equal
+from .comparing import approx_equal
 
 
 def common_row_or_column(coords_list):
@@ -40,8 +39,8 @@ def common_row_or_column(coords_list):
         return column_index_from_string(col)
 
     else:
-        raise Exception("There is no common row or column in " +
-                        repr(coords_list))
+        raise Exception(
+            "There is no common row or column in " + repr(coords_list))
 
 
 def coord_in_scope(coord, coords):
@@ -66,18 +65,17 @@ def coord_in_scope(coord, coords):
     col = ws[coords[0]].column
 
     if all([ws[scope_coord].row == row for scope_coord in coords]):
-        return (ws[coord].row >= row and
-                any([ws[scope_coord].column == ws[coord].column for
-                     scope_coord in coords]))
+        return (ws[coord].row >= row and any([
+            ws[scope_coord].column == ws[coord].column
+            for scope_coord in coords
+        ]))
 
     elif all([ws[scope_coord].column == col for scope_coord in coords]):
-        return (ws[coord].column >= col and
-                any([ws[scope_coord].row == ws[coord].row for
-                     scope_coord in coords]))
+        return (ws[coord].column >= col and any(
+            [ws[scope_coord].row == ws[coord].row for scope_coord in coords]))
 
     else:
-        raise Exception("There is no common row or column in " +
-                        repr(coords))
+        raise Exception("There is no common row or column in " + repr(coords))
 
 
 def consecutive_cells(cell_list):
@@ -151,7 +149,7 @@ def open_xls_as_xlsx(filename, data_only=True):
     Returns:
         Workbook: An openpyxl.Workbook.
     """
-    assert filename[-4:] == ".xls", unicode(filename) + " is not an .xls file."
+    assert filename[-4:] == ".xls", str(filename) + " is not an .xls file."
 
     wb_old = xlrd.open_workbook(filename)
     # TODO: data_only attribute must be changed because is deprecated
@@ -171,10 +169,11 @@ def open_xls_as_xlsx(filename, data_only=True):
 
         ws = wb.create_sheet(title=ws_old.name)
 
-        for row in xrange(0, nrows):
-            for col in xrange(0, ncols):
-                ws.cell(row=row + 1, column=col + 1).value = ws_old.cell_value(
-                    row, col)
+        for row in range(0, nrows):
+            for col in range(0, ncols):
+                ws.cell(
+                    row=row + 1, column=col + 1).value = ws_old.cell_value(
+                        row, col)
 
     return wb
 
@@ -198,7 +197,7 @@ def make_wb_copy(wb):
         ws_copy = wb_copy.create_sheet(title=ws.title)
         for row in ws.rows:
             for cell in row:
-                cell_copy = ws_copy[cell.column + unicode(cell.row)]
+                cell_copy = ws_copy[cell.column + str(cell.row)]
                 cell_copy.value = cell.value
 
     return wb_copy
@@ -222,7 +221,7 @@ def make_ws_copy(ws):
     ws_copy = wb_copy.create_sheet(title=ws.title)
     for row in ws.rows:
         for cell in row:
-            cell_copy = ws_copy[cell.column + unicode(cell.row)]
+            cell_copy = ws_copy[cell.column + str(cell.row)]
             cell_copy.value = cell.value
 
     return ws_copy
@@ -273,10 +272,12 @@ def compare_cells_ws(ws1, ws2):
     for row1, row2 in zip(ws1.rows, ws2.rows):
         for cell1, cell2 in zip(row1, row2):
 
-            msg = "".join([_safe_str(cell1.value), " != ",
-                           _safe_str(cell2.value), "\nrow: ",
-                           str(cell1.row),
-                           " column: ", str(cell1.column)])
+            msg = "".join([
+                _safe_str(cell1.value), " != ",
+                _safe_str(cell2.value), "\nrow: ",
+                str(cell1.row), " column: ",
+                str(cell1.column)
+            ])
 
             try:
                 value1 = float(cell1.value)
@@ -298,7 +299,7 @@ def normalize_value(value):
     """Strip spaces if the value is a string, convert None to empty string or
     let it pass otherwise."""
 
-    if type(value) == unicode or type(value) == str:
+    if type(value) == str or type(value) == str:
         return value.strip()
     elif value is None:
         return ""
@@ -327,7 +328,7 @@ def _safe_str(value):
     if not value:
         RV = str(value)
 
-    elif type(value) == str or type(value) == unicode:
+    elif type(value) == str or type(value) == str:
         RV = value.encode("utf-8")
 
     else:
@@ -347,7 +348,7 @@ def print_xl_range(ws, cells_range="A1:E10", width=15):
     for row in ws[cells_range]:
 
         for cell in row:
-            value = unicode(cell.coordinate) + ": " + unicode(cell.value)
+            value = str(cell.coordinate) + ": " + str(cell.value)
 
             # fix length of value representation
             if len(value) > width:
@@ -356,15 +357,16 @@ def print_xl_range(ws, cells_range="A1:E10", width=15):
                 value = value.ljust(width)
 
             # print new value
-            print "| " + value,
+            print("| " + value, end=' ')
 
         # print last border of the row
-        print "| "
+        print("| ")
 
         # print the separator between rows
         for cell in row:
-            print "| " + "-" * (width),
-        print "| "
+            print("| " + "-" * (width), end=' ')
+        print("| ")
+
 
 if __name__ == '__main__':
     import doctest

@@ -12,8 +12,6 @@ from xlseries.strategies.discover.parameters import Parameters
 from xlseries.strategies.discover.parameters import InvalidParameter
 from xlseries.strategies.discover.parameters import CriticalParameterMissing
 from xlseries.utils.case_loaders import load_critical_parameters_case
-
-
 """
 test_parameters
 
@@ -33,7 +31,6 @@ def get_exp_params_path(file_name):
 
 # @unittest.skip("skip")
 class ParametersTest(unittest.TestCase):
-
     def setUp(self):
         self.params = Parameters(get_orig_params_path("test_params.json"))
         self.params_exp = Parameters(get_exp_params_path("test_params.json"))
@@ -66,12 +63,11 @@ class ParametersTest(unittest.TestCase):
         self.assertEqual(self.params._get_num_series({"param": None}), None)
 
     def test_get_series_params(self):
-        params = Parameters(get_orig_params_path(
-            "test_params_time_multicolumn.json"))
+        params = Parameters(
+            get_orig_params_path("test_params_time_multicolumn.json"))
 
-        self.assertEqual(params["time_header_coord"], [["A1", "A2"],
-                                                       ["A1", "A2"],
-                                                       ["A1", "A2"]])
+        self.assertEqual(params["time_header_coord"],
+                         [["A1", "A2"], ["A1", "A2"], ["A1", "A2"]])
 
         self.assertEqual(params[0]["time_header_coord"], ["A1", "A2"])
 
@@ -126,8 +122,9 @@ class ParametersTest(unittest.TestCase):
             "composed_headers_coord": None,
             "context": None
         })
-        exp_missings = ["time_composed", "continuity",
-                        "blank_rows", "missings"]
+        exp_missings = [
+            "time_composed", "continuity", "blank_rows", "missings"
+        ]
 
         self.assertEqual(set(exp_missings), set(params.get_missings()))
 
@@ -206,7 +203,6 @@ class ParametersTest(unittest.TestCase):
 
 
 class ParametersClassMethodsTest(unittest.TestCase):
-
     """Test class mehtods that don't need to load parameters to be tested."""
 
     def test_ensure_critical_parameters_exception(self):
@@ -214,17 +210,20 @@ class ParametersClassMethodsTest(unittest.TestCase):
         critical = ["data_starts"]
         valid_values = {"data_starts": [int]}
         with self.assertRaises(CriticalParameterMissing):
-            Parameters._check_has_critical(params, critical,
-                                           valid_values)
+            Parameters._check_has_critical(params, critical, valid_values)
 
     def test_check_consistency(self):
-        params_dict = {"data_starts": 1,
-                       "headers_coord": ["A2", "B2", "C2", "D2"]}
+        params_dict = {
+            "data_starts": 1,
+            "headers_coord": ["A2", "B2", "C2", "D2"]
+        }
         with self.assertRaises(AssertionError):
             Parameters._check_consistency(params_dict)
 
-        params_dict = {"data_starts": 1,
-                       "headers_coord": ["B1", "B2", "B3", "B4"]}
+        params_dict = {
+            "data_starts": 1,
+            "headers_coord": ["B1", "B2", "B3", "B4"]
+        }
         with self.assertRaises(AssertionError):
             Parameters._check_consistency(params_dict)
 
@@ -308,42 +307,44 @@ class ParametersClassMethodsTest(unittest.TestCase):
 
         headers_coord = ["A1_B1", "A2_B2", "A3_B3"]
         exp = ([["A1"], ["A2"], ["A3"]], ["B1", "B2", "B3"])
-        self.assertEqual(Parameters._separate_composed_headers(headers_coord),
-                         exp)
+        self.assertEqual(
+            Parameters._separate_composed_headers(headers_coord), exp)
 
         headers_coord = ["A1_B1_C1", "A2_B2_C2", "A3_B3_C3"]
         exp = ([["A1", "B1"], ["A2", "B2"], ["A3", "B3"]], ["C1", "C2", "C3"])
-        self.assertEqual(Parameters._separate_composed_headers(headers_coord),
-                         exp)
+        self.assertEqual(
+            Parameters._separate_composed_headers(headers_coord), exp)
 
     def test_process_context(self):
 
         context = {"GDP": "A5-A8"}
         headers_coord = ["A5", "A6", "A7", "A8"]
         exp_context = [["GDP"], ["GDP"], ["GDP"], ["GDP"]]
-        self.assertEqual(Parameters._process_context(context, headers_coord),
-                         exp_context)
+        self.assertEqual(
+            Parameters._process_context(context, headers_coord), exp_context)
 
         context = {"GDP": "A5-A8"}
         headers_coord = ["B5", "B6", "B7", "B8"]
         exp_context = [["GDP"], ["GDP"], ["GDP"], ["GDP"]]
-        self.assertEqual(Parameters._process_context(context, headers_coord),
-                         exp_context)
+        self.assertEqual(
+            Parameters._process_context(context, headers_coord), exp_context)
 
         context = {"GDP": ["A5-A6", "A8-A9"]}
         headers_coord = ["B5", "B6", "B7", "B8", "B9"]
         exp_context = [["GDP"], ["GDP"], [], ["GDP"], ["GDP"]]
-        self.assertEqual(Parameters._process_context(context, headers_coord),
-                         exp_context)
+        self.assertEqual(
+            Parameters._process_context(context, headers_coord), exp_context)
 
-        context = {"GDP": ["A5-A6", "A8-A9"],
-                   "Agricultural": "A5-A6",
-                   "Industrial": "A8-A9"}
+        context = {
+            "GDP": ["A5-A6", "A8-A9"],
+            "Agricultural": "A5-A6",
+            "Industrial": "A8-A9"
+        }
         headers_coord = ["B5", "B6", "B7", "B8", "B9"]
         exp_context = [["GDP", "Agricultural"], ["GDP", "Agricultural"], [],
                        ["GDP", "Industrial"], ["GDP", "Industrial"]]
-        self.assertEqual(Parameters._process_context(context, headers_coord),
-                         exp_context)
+        self.assertEqual(
+            Parameters._process_context(context, headers_coord), exp_context)
 
 
 def load_case_number():
@@ -358,65 +359,80 @@ def load_case_number():
             fn(*args, **kwargs)
 
         return fn_decorated
+
     return fn_decorator
 
 
 # @unittest.skip("skip")
 class ParametersCriticalDictTestCase(unittest.TestCase):
-
     """Test Parameters loading dict with only critical parameters."""
 
     CRITICAL_PARAMS = {
-
-        1: {'data_starts': 2,
-            'frequency': u'm',
-            'headers_coord': [u'B1', u'C1'],
-            'time_header_coord': u'A1'},
-
-        2: {'blank_rows': [False, True],
+        1: {
+            'data_starts': 2,
+            'frequency': 'm',
+            'headers_coord': ['B1', 'C1'],
+            'time_header_coord': 'A1'
+        },
+        2: {
+            'blank_rows': [False, True],
             'continuity': [True, False],
             'data_starts': [5, 22],
-            'frequency': [u'D', u'M'],
-            'headers_coord': [u'D4', u'F4'],
-            'missing_value': [u'Implicit', None],
+            'frequency': ['D', 'M'],
+            'headers_coord': ['D4', 'F4'],
+            'missing_value': ['Implicit', None],
             'missings': [True, False],
             'time_alignment': [0, -1],
-            'time_header_coord': [u'C4', u'F4']},
-
-        3: {'data_starts': 7,
-            'frequency': u'Q',
-            'headers_coord': [u'B4', u'C4', u'D4'],
-            'time_header_coord': u'A4'},
-
-        4: {'data_starts': [5, 5, 5, 5, 52, 52, 52, 52],
-            'frequency': u'q',
-            'headers_coord': [u'B4', u'C4', u'D4', u'E4', u'B51', u'C51',
-                              u'D51', u'E51'],
-            'time_header_coord': [u'A4', u'A4', u'A4', u'A4', u'A51', u'A51',
-                                  u'A51', u'A51'],
-            'missing_value': [u'\u2026']},
-
-        5: {'data_starts': 28,
-            'frequency': u'M',
-            'headers_coord': [u'G22', u'H22'],
-            'time_header_coord': u'A18'},
-
-        6: {'data_starts': 3,
-            'frequency': u'yQQQQ',
-            'headers_coord': ['B8', 'B9', 'B10', 'B11', 'B12', 'B13', 'B14',
-                              'B15', 'B16', 'B17', 'B18', 'B19', 'B20', 'B21',
-                              'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B28'],
-            'time_header_coord': [u'C4', u'C6']},
-
-        7: {'data_starts': 2,
-            'frequency': u'Y',
-            'headers_coord': [u'A8', 'A10', 'A11', 'A12', 'A14', 'A15', 'A16',
-                              'A18', 'A19', 'A20', 'A21', 'A22', 'A24',
-                              'A25', 'A26', u'A28', u'A30', u'A32', u'A34',
-                              'A36', 'A37', 'A38', 'A39', 'A41', 'A42',
-                              'A43', 'A44', u'A46', u'A48', 'A50', 'A51',
-                              'A52', u'A55'],
-            'time_header_coord': u'A6'}
+            'time_header_coord': ['C4', 'F4']
+        },
+        3: {
+            'data_starts': 7,
+            'frequency': 'Q',
+            'headers_coord': ['B4', 'C4', 'D4'],
+            'time_header_coord': 'A4'
+        },
+        4: {
+            'data_starts': [5, 5, 5, 5, 52, 52, 52, 52],
+            'frequency':
+            'q',
+            'headers_coord':
+            ['B4', 'C4', 'D4', 'E4', 'B51', 'C51', 'D51', 'E51'],
+            'time_header_coord':
+            ['A4', 'A4', 'A4', 'A4', 'A51', 'A51', 'A51', 'A51'],
+            'missing_value': ['\u2026']
+        },
+        5: {
+            'data_starts': 28,
+            'frequency': 'M',
+            'headers_coord': ['G22', 'H22'],
+            'time_header_coord': 'A18'
+        },
+        6: {
+            'data_starts':
+            3,
+            'frequency':
+            'yQQQQ',
+            'headers_coord': [
+                'B8', 'B9', 'B10', 'B11', 'B12', 'B13', 'B14', 'B15', 'B16',
+                'B17', 'B18', 'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25',
+                'B26', 'B27', 'B28'
+            ],
+            'time_header_coord': ['C4', 'C6']
+        },
+        7: {
+            'data_starts':
+            2,
+            'frequency':
+            'Y',
+            'headers_coord': [
+                'A8', 'A10', 'A11', 'A12', 'A14', 'A15', 'A16', 'A18', 'A19',
+                'A20', 'A21', 'A22', 'A24', 'A25', 'A26', 'A28', 'A30', 'A32',
+                'A34', 'A36', 'A37', 'A38', 'A39', 'A41', 'A42', 'A43', 'A44',
+                'A46', 'A48', 'A50', 'A51', 'A52', 'A55'
+            ],
+            'time_header_coord':
+            'A6'
+        }
     }
 
     def check_critical_dict_params(self, case_num):
@@ -471,35 +487,40 @@ class ParametersCriticalDictTestCase(unittest.TestCase):
 
     # @unittest.skip("skip")
     def test_case_external1(self):
-        p = {'data_starts': 2,
-             'frequency': 'Q',
-             'headers_coord': 'A53',
-             'time_header_coord': 'A52'}
+        p = {
+            'data_starts': 2,
+            'frequency': 'Q',
+            'headers_coord': 'A53',
+            'time_header_coord': 'A52'
+        }
         params = Parameters(p)
         self.assertTrue(params["alignment"] is None)
 
-        p2 = {'alignment': 'horizontal',
-              'data_starts': 2,
-              'frequency': 'Q',
-              'headers_coord': 'A53',
-              'time_header_coord': 'A52'}
+        p2 = {
+            'alignment': 'horizontal',
+            'data_starts': 2,
+            'frequency': 'Q',
+            'headers_coord': 'A53',
+            'time_header_coord': 'A52'
+        }
         params = Parameters(p2)
         self.assertEqual(params["alignment"][0], "horizontal")
 
 
 # @unittest.skip("skip")
 class ParametersIntegrationTestCase(unittest.TestCase):
-
     """Test Parameters loading sets of user inputed parameters.
 
     Check that the sanitization and completion of the user inputed sets
     of parameters is the one that should be expected."""
 
     def test_composed_headers(self):
-        p = {'data_starts': 4,
-             'frequency': 'Q',
-             'headers_coord': '(A2_B2)-(A5_B5)',
-             'time_header_coord': 'A1'}
+        p = {
+            'data_starts': 4,
+            'frequency': 'Q',
+            'headers_coord': '(A2_B2)-(A5_B5)',
+            'time_header_coord': 'A1'
+        }
         params = Parameters(p)
 
         exp_headers_coord = ["B2", "B3", "B4", "B5"]
@@ -510,15 +531,20 @@ class ParametersIntegrationTestCase(unittest.TestCase):
                          exp_composed_headers_coord)
 
     def test_context(self):
-        p = {'data_starts': 2,
-             'frequency': 'Q',
-             'headers_coord': 'A2-A5',
-             'time_header_coord': 'A1',
-             'context': {"GDP": "A2-A5"}}
+        p = {
+            'data_starts': 2,
+            'frequency': 'Q',
+            'headers_coord': 'A2-A5',
+            'time_header_coord': 'A1',
+            'context': {
+                "GDP": "A2-A5"
+            }
+        }
         params = Parameters(p)
 
         exp_context = [["GDP"], ["GDP"], ["GDP"], ["GDP"]]
         self.assertEqual(params["context"], exp_context)
+
 
 if __name__ == '__main__':
     nose.run(defaultTest=__name__)

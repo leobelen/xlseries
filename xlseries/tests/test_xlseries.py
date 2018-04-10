@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 test_xlseries
 
@@ -31,13 +30,15 @@ def load_case_number():
             fn(*args, **kwargs)
 
         return fn_decorated
+
     return fn_decorator
 
 
 # @unittest.skip("skip")
 class TestXlSeriesWithAllParameters(unittest.TestCase):
-
-    def run_case_with_parameters(self, case_num, specific_params=None,
+    def run_case_with_parameters(self,
+                                 case_num,
+                                 specific_params=None,
                                  special_case=None):
         """Run a test case with parameters using ParameterDiscovery strategy.
 
@@ -50,7 +51,7 @@ class TestXlSeriesWithAllParameters(unittest.TestCase):
         exp_dfs = load_expected_case(case_num, special_case)
 
         if specific_params:
-            for specific_param, value in specific_params.iteritems():
+            for specific_param, value in specific_params.items():
                 params[specific_param] = value
 
         # get dfs from the strategy
@@ -63,7 +64,7 @@ class TestXlSeriesWithAllParameters(unittest.TestCase):
             exp_dfs = [exp_dfs]
 
         for test_df, exp_df in zip(test_dfs, exp_dfs):
-            print test_df.columns, exp_df.columns
+            print(test_df.columns, exp_df.columns)
             self.assertTrue(compare_data_frames(test_df, exp_df))
 
     # @unittest.skip("skip")
@@ -106,8 +107,9 @@ class TestXlSeriesWithAllParameters(unittest.TestCase):
 
 # @unittest.skip("skip")
 class TestXlSeriesWithoutSomeParameters(unittest.TestCase):
-
-    def run_case_without_some_parameters(self, case_num, specific_params=None,
+    def run_case_without_some_parameters(self,
+                                         case_num,
+                                         specific_params=None,
                                          special_case=None):
         """Run a test case deleting some parameters.
 
@@ -120,7 +122,7 @@ class TestXlSeriesWithoutSomeParameters(unittest.TestCase):
 
         params.remove_non_critical()
         if specific_params:
-            for specific_param, value in specific_params.iteritems():
+            for specific_param, value in specific_params.items():
                 params[specific_param] = value
 
         # change safe_mode to True, for complete test in safe_mode (very slow)
@@ -156,7 +158,7 @@ class TestXlSeriesWithoutSomeParameters(unittest.TestCase):
     @load_case_number()
     def test_case4(self, case_num):
         self.run_case_without_some_parameters(
-            case_num, specific_params={"missing_value": u'\u2026'})
+            case_num, specific_params={"missing_value": '\u2026'})
 
     # @unittest.skip("skip")
     @load_case_number()
@@ -170,7 +172,8 @@ class TestXlSeriesWithoutSomeParameters(unittest.TestCase):
     @load_case_number()
     def test_case6(self, case_num):
         self.run_case_without_some_parameters(
-            case_num, specific_params={
+            case_num,
+            specific_params={
                 "continuity": False,
                 "blank_rows": True
             })
@@ -187,13 +190,9 @@ class TestXlSeriesVariations(TestXlSeriesWithAllParameters):
     # @unittest.skip("skip")
     @load_case_number()
     def test_context_case6(self, case_num):
-        specific_params = {"context": {
-            "VABpb": "A8-A23",
-            "PIBpm": "A8-A27"
-        }}
-        self.run_case_with_parameters(case_num,
-                                      specific_params=specific_params,
-                                      special_case="_context")
+        specific_params = {"context": {"VABpb": "A8-A23", "PIBpm": "A8-A27"}}
+        self.run_case_with_parameters(
+            case_num, specific_params=specific_params, special_case="_context")
 
     @load_case_number()
     def test_composed_header_case6(self, case_num):
@@ -204,9 +203,10 @@ class TestXlSeriesVariations(TestXlSeriesWithAllParameters):
             },
             "headers_coord": "(A8_B8)-(A28_B28)"
         }
-        self.run_case_with_parameters(case_num,
-                                      specific_params=specific_params,
-                                      special_case="_composed_headers")
+        self.run_case_with_parameters(
+            case_num,
+            specific_params=specific_params,
+            special_case="_composed_headers")
 
 
 if __name__ == '__main__':

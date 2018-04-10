@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 from setuptools import setup
 import os
 
@@ -17,7 +16,6 @@ with open(os.path.abspath("requirements_dev.txt")) as f:
 with open('PYPI_LONG_DESCRIPTION.rst') as readme_file:
     readme = readme_file.read()
 
-
 setup(
     name='xlseries',
     version='0.1.25',
@@ -30,11 +28,8 @@ setup(
     url='https://github.com/abenassi/xlseries',
     download_url='https://github.com/abenassi/xlseries/archive/master.zip',
     packages=[
-        'xlseries',
-        'xlseries.strategies',
-        'xlseries.strategies.clean',
-        'xlseries.strategies.discover',
-        'xlseries.strategies.get',
+        'xlseries', 'xlseries.strategies', 'xlseries.strategies.clean',
+        'xlseries.strategies.discover', 'xlseries.strategies.get',
         'xlseries.utils'
     ],
     package_dir={'xlseries': 'xlseries'},
@@ -44,14 +39,10 @@ setup(
     zip_safe=False,
     keywords="xlseries excel time series data opendata scraper",
     classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
+        'Development Status :: 3 - Alpha', 'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Topic :: Office/Business'
+        'Natural Language :: English', 'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7', 'Topic :: Office/Business'
     ],
     test_suite='nose.collector',
-    tests_require=test_requirements
-)
+    tests_require=test_requirements)

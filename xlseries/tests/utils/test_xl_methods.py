@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 test_xl_methods
 
@@ -22,7 +21,6 @@ from xlseries.utils.path_finders import abs_path
 
 
 class XlMethodsTest(unittest.TestCase):
-
     def test_xl_coordinates_range(self):
 
         obs = list(xl_coordinates_range("A5", "A7"))
@@ -34,9 +32,7 @@ class XlMethodsTest(unittest.TestCase):
         self.assertEqual(obs, exp)
 
         obs = list(xl_coordinates_range("A5", "C7"))
-        exp = ["A5", "B5", "C5",
-               "A6", "B6", "C6",
-               "A7", "B7", "C7"]
+        exp = ["A5", "B5", "C5", "A6", "B6", "C6", "A7", "B7", "C7"]
         self.assertEqual(obs, exp)
 
         obs = list(xl_coordinates_range("A5"))

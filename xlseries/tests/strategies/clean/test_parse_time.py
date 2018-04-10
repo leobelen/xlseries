@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 test_parse_time
 
 Tests for `parse_time` module.
 """
-from __future__ import unicode_literals
+
 import unittest
 import nose
 import arrow
@@ -46,21 +45,24 @@ def load_case_number():
             fn(*args, **kwargs)
 
         return fn_decorated
+
     return fn_decorator
 
 
 # @unittest.skip("skip")
 class ParseSimpleTimeTest(unittest.TestCase):
-
     def run_pt(self, params, exp_value, value, last_time=None,
                next_value=None):
         new_value = ParseSimpleTime()._parse_time(params, value, last_time,
                                                   next_value)
 
-        msg = " ".join([repr(new_value), "!=", repr(exp_value), "\n",
-                        "value:", repr(value),
-                        "last time:", repr(last_time),
-                        "next value:", repr(next_value)])
+        msg = " ".join([
+            repr(new_value), "!=",
+            repr(exp_value), "\n", "value:",
+            repr(value), "last time:",
+            repr(last_time), "next value:",
+            repr(next_value)
+        ])
 
         self.assertEqual(new_value, exp_value, msg)
 
@@ -101,20 +103,26 @@ class ParseSimpleTimeTest(unittest.TestCase):
         last_time = arrow.get(2009, 12, 16)
         next_value = "18-12-09"
 
-        with patch.object(ParseSimpleTime, "_get_possible_time_formats",
-                          return_value=["YY-MM-DD"]):
+        with patch.object(
+                ParseSimpleTime,
+                "_get_possible_time_formats",
+                return_value=["YY-MM-DD"]):
             value = "12-17.09"
-            self.assertRaises(NoTimeValue, ParseSimpleTime()._parse_time,
-                              params[0], value, last_time, next_value)
+            self.assertRaises(NoTimeValue,
+                              ParseSimpleTime()._parse_time, params[0], value,
+                              last_time, next_value)
 
-        with patch.object(ParseSimpleTime, "_get_possible_time_formats",
-                          return_value=["MM-DD-YY"]):
+        with patch.object(
+                ParseSimpleTime,
+                "_get_possible_time_formats",
+                return_value=["MM-DD-YY"]):
             value = "17-12.09"
-            self.assertRaises(NoTimeValue, ParseSimpleTime()._parse_time,
-                              params[0], value, last_time, next_value)
+            self.assertRaises(NoTimeValue,
+                              ParseSimpleTime()._parse_time, params[0], value,
+                              last_time, next_value)
 
     def test_parse_time_case4_invalid_date(self):
-        no_time = u"Var. 4° Trim.13 / 4° Trim.12"
+        no_time = "Var. 4° Trim.13 / 4° Trim.12"
         last = arrow.get(2013, 10, 1).datetime
 
         with self.assertRaises(parsley.ParseError):
@@ -127,40 +135,35 @@ class ParseSimpleTimeTest(unittest.TestCase):
         last_time = arrow.get(2009, 12, 16)
         next_value = "18-12-09"
 
-        make_sense = ParseSimpleTime()._time_make_sense(params[0],
-                                                        time_value, last_time,
-                                                        next_value)
+        make_sense = ParseSimpleTime()._time_make_sense(
+            params[0], time_value, last_time, next_value)
         self.assertFalse(make_sense)
 
-        make_sense = ParseSimpleTime()._time_make_sense(params[0],
-                                                        time_value, None,
-                                                        next_value)
+        make_sense = ParseSimpleTime()._time_make_sense(
+            params[0], time_value, None, next_value)
         self.assertFalse(make_sense)
 
         time_value = arrow.get(2002, 3, 10)
         last_time = arrow.get(2010, 3, 1)
 
-        make_sense = ParseSimpleTime()._time_make_sense(params[0],
-                                                        time_value, last_time,
-                                                        next_value)
+        make_sense = ParseSimpleTime()._time_make_sense(
+            params[0], time_value, last_time, next_value)
         self.assertFalse(make_sense)
 
         time_value = arrow.get(2010, 2, 3)
         last_time = arrow.get(2010, 3, 1)
         next_value = arrow.get(2010, 3, 3)
 
-        make_sense = ParseSimpleTime()._time_make_sense(params[0],
-                                                        time_value, last_time,
-                                                        next_value)
+        make_sense = ParseSimpleTime()._time_make_sense(
+            params[0], time_value, last_time, next_value)
         self.assertFalse(make_sense)
 
         time_value = arrow.get(2010, 3, 2)
         last_time = arrow.get(2010, 3, 1)
         next_value = arrow.get(2010, 3, 3)
 
-        make_sense = ParseSimpleTime()._time_make_sense(params[0],
-                                                        time_value, last_time,
-                                                        next_value)
+        make_sense = ParseSimpleTime()._time_make_sense(
+            params[0], time_value, last_time, next_value)
         self.assertTrue(make_sense)
 
     def test_get_possible_time_formats(self):
@@ -168,12 +171,11 @@ class ParseSimpleTimeTest(unittest.TestCase):
         self.assertEqual(set(gen), set(["DD-MM-YY", "MM-DD-YY", "YY-MM-DD"]))
 
         gen = ParseSimpleTime()._get_possible_time_formats("02-03-2010")
-        self.assertEqual(set(gen), set(["DD-MM-YYYY", "MM-DD-YYYY",
-                                        "YY-MM-DDDD"]))
+        self.assertEqual(
+            set(gen), set(["DD-MM-YYYY", "MM-DD-YYYY", "YY-MM-DDDD"]))
 
 
 class ParseComposedTimeTest(unittest.TestCase):
-
     def parse_time_values(self, strategy, values, params):
 
         last_time = None
@@ -195,16 +197,14 @@ class ParseComposedTimeTest(unittest.TestCase):
             strategy: Strategy to parse the case.
         """
         if not external:
-            case = "test_case" + unicode(case_num)
+            case = "test_case" + str(case_num)
         else:
-            case = "external_case" + unicode(case_num)
+            case = "external_case" + str(case_num)
 
-        with open(os.path.join(abs_path("original"),
-                               "parse_time.json")) as f:
+        with open(os.path.join(abs_path("original"), "parse_time.json")) as f:
             values = json.load(f)[case]
 
-        with open(os.path.join(abs_path("expected"),
-                               "parse_time.json")) as f:
+        with open(os.path.join(abs_path("expected"), "parse_time.json")) as f:
             exp_vals = json.load(f)[case]
             exp_vals = [eval(value) for value in exp_vals]
 
@@ -217,8 +217,11 @@ class ParseComposedTimeTest(unittest.TestCase):
 
         new_values = self.parse_time_values(strategy, values, params)
 
-        msg = " ".join([str(case), ":", str(new_values),
-                        "are not equal to", str(exp_vals)])
+        msg = " ".join([
+            str(case), ":",
+            str(new_values), "are not equal to",
+            str(exp_vals)
+        ])
         self.assertEqual(new_values, exp_vals, msg)
 
     @load_case_number()
